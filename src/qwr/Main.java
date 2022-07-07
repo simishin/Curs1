@@ -5,9 +5,10 @@ import qwr.config.VSensor;
 import qwr.visual.BackGround;
 
 public class Main {
-
+    public static Loger u= Loger.init();
     public static void main(String[] args) {
-	// write your code here
+    	Menu.consol();
+//	    Dialog.consol();
     }//main -----------------------------------------------------------------------
 }//class Main ======================================================================
 /*
