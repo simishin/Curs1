@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
 
-class Loger{
+public class Loger{
 	public  static boolean  prnq(String s){System.out.println(s); return true;}
 	public  static boolean  prnt(String s){System.out.print(s); return true;}
 	public  static boolean  prne(String s){System.err.println(s); return true;}

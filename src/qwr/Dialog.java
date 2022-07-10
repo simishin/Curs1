@@ -1,169 +1,133 @@
 package qwr;
 
+import qwr.config.AreaZon;
+
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
-/**
- * пользовательский диалог
- */
-record Menu( int jItem, int jNext, int level, String uTitle){
-	private static int jSelect=0;//текущая позиция
-	public 	static int rights=1; //права
-	private static final Menu[] uTreeMenu = new Menu[61];
-//	int		jItem;//номер пункта
-//	int		jNext;//направление перехода
-//	String 	uTitle;//текст пункта меню
 
-//	Menu(int jItem, int jNext, String uTitle) { this(jItem, jNext, 0, uTitle); }
+public class Dialog<T> {
+	static int lines=7;//количество строк для единовременного вывода на экран
+	static int count=0;//указатель положения
+//	static public List<Item> list;
 
-	public static void consol(){
-		Menu.init();
-		Main.u.log("--Dialog--");
-		Scanner con = new Scanner(System.in);
-		Loger.prnq("Вас приветствует Курсовая по JAVA\n текущий уровень доступа: "+rights);
+	public static int consol(Scanner con, List<Item> list){
+		Loger.prnq(list.get(0).printTitul());//печать заголовка
+		printFooter(list);
+		String	qs;
+		int jbeg, jend, quant;
+		label:
 		while (true){
-			Menu.print();
-			try {
-				int y = action(con,Menu.next(con.nextInt()));
-				if (y >=0) jSelect=y;
-				else if (y==-2) previous();
-			}
-			catch (InputMismatchException ex){
-				if (con.next().equals("q")) break;
-				Loger.prne("Error, повторите ввод 'q'\n");
-			}//catch
+			qs=con.nextLine();
+			jbeg=0;
+			jend=0;
+//			Loger.prnt(qs.length()+"*");
+			if (qs.length() !=0) {
+				for (int i = 1; i < qs.length(); i++) {
+					if (qs.charAt(i) >= '0' && qs.charAt(i) <= '9')
+						jend = jend * 10 + (qs.charAt(i) - '0');
+					else if (jbeg == 0) {
+						jbeg = jend;
+						jend = 0;
+					} else if (jend != 0) break;
+				}
+				if (jbeg==0 && jend != 0) {jbeg = jend;	jend = 0;}
+				Loger.logs(" "+qs.charAt(0)+"="+jbeg+"-"+jend);
+				switch (qs.charAt(0)) {
+					case 'q':
+					case '/': break label;
+					case ' ':
+					case '*':
+						count=jbeg;
+						printNext(list);
+						jbeg=0;
+						break;
+					case '+':  printQuant(adding(list,jbeg,jend),jbeg,jend); break;
+					case '-':  printQuant(removal(list,jbeg,jend),jbeg,jend); break;
+					case '%':  if(editing(con,list,jbeg,jend)) break label; else break;
+					default:
+				}//switch
+			} else printNext(list);
+			printFooter(list);
+//			qs=con.next();// ввода до тех пор, пока не встретится разделитель (по умолчанию это пробел, но вы также можете его изменить)
+//			s=inp.nextLine();// сканирует ввод, пока мы не нажмем кнопку ввода, и не вернем все это целиком, и поместит курсор в следующую строку.
 		}//while
+		return 0;
 	}//consol
-	private static void add(int jItem, int jNext, String uTitul){add(jItem,jNext,0,uTitul);}
-	private static void add(int jItem, int jNext, int level, String uTitul){
-		assert jSelect < uTreeMenu.length: "Превышение размера массива меню при инициализации. "+uTreeMenu.length;
-		uTreeMenu[jSelect] = new Menu(jItem,jNext, level, uTitul);
-		jSelect++;
-	}//add
 
-	private static void print(){
-		for (Menu x: Menu.uTreeMenu ) if (x.jItem == Menu.jSelect){
-			Loger.prnq("Меню: "+x.jItem+" ---"+x.uTitle +"--- ( Уровень доступа "+rights+")");
-			break;
+	private static void printQuant(int quant, int jbeg, int jend){
+		int x= jend==0 ? 1 : jend - jbeg + 1;
+		Loger.prnq("Обработано "+quant+" из "+x);
+	}//printQuant
+
+	private static void printNext(List<Item> list) {//печать одной странички из списка
+		if (list.size()<1) return;
+//		if (lines==0 || lines>list.size()) lines=list.size();
+		Loger.prnq("\t"+list.get(0).printHd());//печать заголовка таблицы
+		for (int i = 0; i < lines; i++) {
+			if (count < 0) count=0;
+			count++;
+			if (count >= list.size()) { count=0; break; }
+			Loger.prnq(count+".\t"+list.get(count).printLn());
 		}
-		for (Menu x: Menu.uTreeMenu ){
-			if (x==null) break;
-			if (x.jItem == Menu.jSelect ) continue;
-			if (x.level > rights ) continue;//пропускаю если не хватает прав
-			if (x.jItem/10 == Menu.jSelect)
-				Loger.prnq(x.jItem%10+". "+x.uTitle);
+		Loger.prnq("---"+count+"/"+list.size());
+//		list.get(0).printList();
+	}//print
+	private static void printFooter(List<Item> list){
+		Loger.prnq("В базе находится "+(list.size()-1)+" элементов\n"+
+				"Введите команду: +-для добавления, --удаления, *-просмотра списка, /-завершение");
+	}//printFooter
+
+	private static int adding(List<Item> list, int jbeg, int jend) {
+		if (jbeg==0) return 0;
+		int z=0;
+		if (jend==0) if (addn(list, jbeg)) return 1;
+		else return 0;
+		else
+			for (int i = jbeg; i <= jend ; i++) if (addn(list, i)) z++;
+		return z;
+	}//adding
+	private static boolean addn(List<Item> list, int j){
+//		Loger.logs("j:"+j);
+		for (Item x:list ) if (x.idItem()==j) return false;
+		Item y=list.get(0).addID(j);
+		if (y == null) return false;//Если не создалось
+		list.add(y);
+		return true;
+	}//addn
+
+	public static int removal(List<Item> list, int jbeg, int jend) {
+		if (jbeg==0) return 0;
+		int z=0;
+		if (jend==0) if (remov(list, jbeg)) return 1;
+		else return 0;
+		else
+			for (int i = jbeg; i <= jend ; i++) if (remov(list, i)) z++;
+		return z;
+	}//removal
+
+	private static boolean remov(List<Item> list, int j){
+		Item z=null;
+		for (Item x:list ) {
+			if (x.idItem()==j) {
+				z=x;
+				break;
 			}
-		Loger.prnq("---\nДля возврата на верхний уровень - 9, а в главное меню - 0 \n?");
-	}//print-----------------------------------------------------------------------
-	private static int next(int j){
-		if (j==0 ){
-			Menu.jSelect=0;
-			return 0;
 		}
-		if (j==9 && Menu.jSelect!=0){
-			Menu.jSelect /=10;
-			return 0;
-		}
-		int y = Menu.jSelect*10+j;
-//		Loger.logs("~~"+j+"  "+y);
-		for (Menu x: Menu.uTreeMenu ) {
-			if (x==null) return -2;
-			if (x.level > rights ) return -3;//пропускаю если не хватает прав
-			if (x.jItem == y) {
-				if (x.jNext > 0) return x.jNext;
-				Menu.jSelect = y;
-				return 0;
-			}
-		}
-		return -1;
-	}//next---------------------------------------------------------------------------
-	private static void  previous(){ if (Menu.jSelect!=0)  Menu.jSelect /=10; }
+		if (z != null) list.remove(z);
+		else return false;
+		return true;
+	}//remov-----------------------------------------------------------------
+	private static void printFooterEdit(){
+		Loger.prnq("Редактирование наименований элементов\n"+
+				"Команды: Ввод для перехода к следующему, +-редактирование " +
+				", --выход в главное меню, *-просмотра списка, /-завершение");
+	}//printFooter
 
-	private static void init(){
-		add(0,0,"Главное меню");
-		add(1,0,"Конфигурирование системы");
-		add(11,0,"Конфигурирование датчиков");
-		add(111,1,"Конфигурирование типов датчиков");
-		add(112,2,"Конфигурирование уставок отдельных датчиков с привязкой к месту");
-		add(113,3,"Привязка зон к датчикам");
-		add(114,4,"Привязка действий к датчикам");
-		add(115,5,"Привязка визуализации к датчикам");
-		add(12,0,"Конфигурирование зон");
-		add(121,6,"Конфигурирование типов зон");
-		add(122,7,"Установка отдельных зон с привязкой к месту");
-		add(123,8,"Привязка датчиков к зонам");
-		add(124,9,"Привязка действий к зонам");
-		add(125,10,"Привязка визуализации к зонам");
-		add(13,0,"Конфигурирование действий");
-		add(131,0,"Конфигурирование типов исполнительных устройств");
-		add(132,0,"Привязка исполнительных устройств к месту и оборудованию");
-		add(133,0,"Привязка к датчикам исполнительных устройств");
-		add(134,0,"Привязка к зонам исполнительных устройств");
-		add(135,0,"Привязка к визуализации исполнительных устройств");
-		add(14,0,"Чтение из файла");
-		add(141,0,"Повторное Чтение текущего файла проекта");
-		add(142,0,"Чтение нового файла проекта");
-		add(143,0,"Сравнение нового файла проекта с текущем");
-		add(15,0,"Запись в файл");
-		add(151,0,"Сохранение текущей конфигурации");
-		add(152,0,"Сохранение конфигурации в новый файл проекта");
-		add(153,0,"Создание нового файла проекта");
-		add(154,0,"Сохранение копии конфигурации проекта");
-		add(16,0,"Запись в аппаратный комплекс");
-		add(17,0,"Чтение из аппаратного комплекса");
-		add(18,0,"Конфигурирование визуализации");
-		add(181,0,"Конфигурирование экранов визуализации");
-		add(182,0,"Создание планов объектов");
-		add(183,0,"Наложение датчиков на планы объектов");
-		add(184,0,"Наложение зон на планы объектов");
-		add(185,0,"Наложение исполнительных устройств на планы объектов");
-		add(186,0,"Привязка планов к экранам");
-		add(187,0,"Конфигурирование действий тревожного монитора");
-		add(2,0,"Визуализация событий");
-		add(21,0,"Визуализация на общем плане  (АРМ администратора, визуализации)");
-		add(22,0,"Визуализация на тревожном мониторе  (АРМ администратора, визуализации)");
-		add(23,0,"Переключение мониторов (АРМ оператора, администратора)");
-		add(3,0,"Протоколирование событий");
-		add(31,0,"Показ текущего списка событий (АРМ оператора, администратора)");
-		add(32,0,"Показ архива событий (АРМ оператора, администратора)");
-		add(33,0,"Установка параметров архивирования событий (только АРМ администратора)");
-		add(34,0,"Установка фильтров событий (АРМ оператора, администратора)");
-		add(35,0,"Сохранение в текстовом файле списка событий за определенный промежуток времени");
-		add(4,0,"Анализ протокола событий по ложным срабатывания (АРМ администратора)");
-		add(41,0,"Построение графиков событий");
-		add(42,0,"Построение фильтров графиков событий");
-		add(43,0,"Наложение на графики событий внешних факторов, временных вех.");
-		add(5,0,"Действия по событиям и по командам оператора");
-		add(51,0,"Установка прав оператора на отдачу команд (АРМ администратора)");
-		add(52,0,"Отработка команд оператора (АРМ управления)");
-		add(53,0,"Установка автоматизации команд по событиям (АРМ администратора)");
-		add(54,0,"Квитирование событий (АРМ оператора, администратора)");
-		add(55,0,"Квитирование команд автоматизации (АРМ оператора, администратора)");
-		add(56,0,"Установка параметров \"жизни\" оператора (АРМ администратора)");
-		add(57,0,"Квитирование \"жизни\" оператора. (АРМ оператора, администратора)");
-		Loger.logs(Menu.jSelect+" Количество строк меню");
-		Menu.jSelect=0;
-	}//init
-
-	/**
-	 * Выбор действия по меню
-	 * @param con передача консоли для использовании
-	 * @param x номер действия из инициализации меню
-	 * @return номер строки меню при возврате, -1 на месте, -2 на уровень выше
-	 */
-	private static int action(Scanner con, int x){
-		if (x<=0 ) return -1;
-		Loger.logs("% "+x);
-		switch (x){
-			case 1:
-				return 0;
-			default: Loger.prne("Данный функционал находится в разработке ("+x+")");
-				return -1;
-		}
-	}//action
-
-}//Menu==================================================================================
-public class Dialog {
-
+	private static boolean editing(Scanner con, List<Item> list, int jbeg, int jend) {
+		printFooterEdit();
+		return false;
+	}//editing
 }//Dialog
 
