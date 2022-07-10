@@ -14,8 +14,9 @@ public class Test {
 		Loger.prnq("Тестирование частей кода");
 		Scanner con = new Scanner(System.in);
 		AreaZon.init();
+		AreaZon.test();
 //		Dialog<AreaZon>.list=AreaZon.list;
 //		Menu.consol();
-	    Dialog.consol(con,AreaZon.list);
+	    Dialog.uConsol(con,AreaZon.list);
 	}//main -----------------------------------------------------------------------
 }//class Test======================================================================

@@ -1,8 +1,4 @@
 package qwr;
-
-import qwr.config.AreaZon;
-
-import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -12,17 +8,16 @@ public class Dialog<T> {
 	static int count=0;//указатель положения
 //	static public List<Item> list;
 
-	public static int consol(Scanner con, List<Item> list){
-		Loger.prnq(list.get(0).printTitul());//печать заголовка
+	public static int uConsol(Scanner con, List<Item> list){
+		Loger.prnq("Создание элементов\n"+list.get(0).printTitul());//печать заголовка
 		printFooter(list);
 		String	qs;
-		int jbeg, jend, quant;
+		int jbeg, jend;
 		label:
 		while (true){
 			qs=con.nextLine();
 			jbeg=0;
 			jend=0;
-//			Loger.prnt(qs.length()+"*");
 			if (qs.length() !=0) {
 				for (int i = 1; i < qs.length(); i++) {
 					if (qs.charAt(i) >= '0' && qs.charAt(i) <= '9')
@@ -33,7 +28,7 @@ public class Dialog<T> {
 					} else if (jend != 0) break;
 				}
 				if (jbeg==0 && jend != 0) {jbeg = jend;	jend = 0;}
-				Loger.logs(" "+qs.charAt(0)+"="+jbeg+"-"+jend);
+//				Loger.logs(" "+qs.charAt(0)+"="+jbeg+"-"+jend);
 				switch (qs.charAt(0)) {
 					case 'q':
 					case '/': break label;
@@ -63,7 +58,6 @@ public class Dialog<T> {
 
 	private static void printNext(List<Item> list) {//печать одной странички из списка
 		if (list.size()<1) return;
-//		if (lines==0 || lines>list.size()) lines=list.size();
 		Loger.prnq("\t"+list.get(0).printHd());//печать заголовка таблицы
 		for (int i = 0; i < lines; i++) {
 			if (count < 0) count=0;
@@ -72,10 +66,9 @@ public class Dialog<T> {
 			Loger.prnq(count+".\t"+list.get(count).printLn());
 		}
 		Loger.prnq("---"+count+"/"+list.size());
-//		list.get(0).printList();
 	}//print
 	private static void printFooter(List<Item> list){
-		Loger.prnq("В базе находится "+(list.size()-1)+" элементов\n"+
+		Loger.prnq("Корректировка списка из "+(list.size()-1)+" элементов\n"+
 				"Введите команду: +-для добавления, --удаления, *-просмотра списка, /-завершение");
 	}//printFooter
 
@@ -122,12 +115,61 @@ public class Dialog<T> {
 	private static void printFooterEdit(){
 		Loger.prnq("Редактирование наименований элементов\n"+
 				"Команды: Ввод для перехода к следующему, +-редактирование " +
-				", --выход в главное меню, *-просмотра списка, /-завершение");
+				", --переход в меню элементов, *-просмотра списка, /-завершение");
 	}//printFooter
 
 	private static boolean editing(Scanner con, List<Item> list, int jbeg, int jend) {
+		Loger.prnq("Редактирование наименований элементов\n"+list.get(0).printTitul());//печать заголовка
+		if (list.size() < 2) return false;
 		printFooterEdit();
-		return false;
+		String	qs;
+		int jNumber=0;//номер элемента в списке
+		boolean single=true;//одиночный вывод или постранично
+		label:
+		while (true){
+			if (single) {
+				Loger.prnt(jNumber + " /" + list.size());
+				Loger.prnq(":\t" + list.get(jNumber).idItem() + "\t<" + list.get(jNumber).titul()+">");
+			} else printNext(list);
+			qs=con.nextLine();
+			if (qs.length() !=0) {
+				jend=0;
+				for (int i = 1; i < qs.length(); i++) {
+					if (qs.charAt(i) >= '0' && qs.charAt(i) <= '9')
+						jend = jend * 10 + (qs.charAt(i) - '0');
+					else break;
+				}//for
+				switch (qs.charAt(0)) {
+					case 'q':
+					case '%':
+						return true;
+					case '/':
+						return false;
+					case ' ':
+						break;
+					case '*':
+						single=false;
+						count= jend==0 ? jNumber: jend;
+						jNumber=1;
+						break;
+					case '+':
+						jNumber = jend==0 ? jNumber+1 : jend;
+						single=true;
+						break;
+					case '-':
+						jNumber = jend==0 ? jNumber-1 : jend;
+						single=true;
+						break;
+					default: list.get(jNumber).setTitul(qs);//записываю изменение
+						jNumber++;
+				}//switch
+			} else {
+				if (single) jNumber++;
+			}
+			if (jNumber >= list.size()) jNumber=1;
+			else if (jNumber < 1) jNumber=list.size()-1;
+			printFooterEdit();
+		}//while
 	}//editing
 }//Dialog
 

@@ -1,15 +1,5 @@
 package qwr;
 
-/**
- * Класс определяет место установки оборудования на объекте
- */
-class Room{
-	int	idRoom;
-	int bild;//здание
-	int floor;//этаж
-	int room;//помещение
-	String titulRoom;//наименование помещения
-}//class Room
 class Placement {//размещение
 	int	idSensor;//ИД датчика
 	int	idArea;//ИД зона
