@@ -1,6 +1,7 @@
 package qwr;
 
 import qwr.config.AreaZon;
+import qwr.config.Room;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -11,7 +12,7 @@ import java.util.Scanner;
 record Menu(int jItem, int jNext, int level, String uTitle) {
 	private static int jSelect = 0;//текущая позиция
 	public static int rights = 1; //права
-	private static final Menu[] uTreeMenu = new Menu[64];
+	private static final Menu[] uTreeMenu = new Menu[65];
 //	int		jItem;//номер пункта
 //	int		jNext;//направление перехода
 //	String 	uTitle;//текст пункта меню
@@ -32,18 +33,19 @@ record Menu(int jItem, int jNext, int level, String uTitle) {
 				else if (y == -3) break;
 			} catch (InputMismatchException ex) {
 				if (con.next().equals("q")) break;
+				if (con.next().equals("/")) previous();
 				Loger.prne("Error, повторите ввод 'q'\n");
 			}//catch
 		}//while
 	}//consol
 
-	private static void add(int jItem, int jNext, String uTitul) {
-		add(jItem, jNext, 0, uTitul);
+	private static void add(int jItem, int jNext, String uTitle) {
+		add(jItem, jNext, 0, uTitle);
 	}
 
-	private static void add(int jItem, int jNext, int level, String uTitul) {
+	private static void add(int jItem, int jNext, int level, String uTitle) {
 		assert jSelect < uTreeMenu.length : "Превышение размера массива меню при инициализации. " + uTreeMenu.length;
-		uTreeMenu[jSelect] = new Menu(jItem, jNext, level, uTitul);
+		uTreeMenu[jSelect] = new Menu(jItem, jNext, level, uTitle);
 		jSelect++;
 	}//add
 
@@ -116,13 +118,14 @@ record Menu(int jItem, int jNext, int level, String uTitle) {
 		add(141, 0, "Повторное Чтение текущего файла проекта");
 		add(142, 0, "Чтение нового файла проекта");
 		add(143, 0, "Сравнение нового файла проекта с текущем");
-		add(15, 0, "Запись в файл");
+		add(15, 0, "Сохранение данных");
 		add(151, 0, "Сохранение текущей конфигурации");
 		add(152, 0, "Сохранение конфигурации в новый файл проекта");
 		add(153, 0, "Создание нового файла проекта");
 		add(154, 0, "Сохранение копии конфигурации проекта");
-		add(16, 0, "Запись в аппаратный комплекс");
-		add(17, 0, "Чтение из аппаратного комплекса");
+		add(155, 0, "Запись в аппаратный комплекс");
+		add(156, 0, "Чтение из аппаратного комплекса");
+		add(16, 3, "Список помещений расположения оборудования, мест");
 		add(18, 0, "Конфигурирование визуализации");
 		add(181, 0, "Конфигурирование экранов визуализации");
 		add(182, 0, "Создание планов объектов");
@@ -174,6 +177,9 @@ record Menu(int jItem, int jNext, int level, String uTitle) {
 				return -3;//Завершение работы
 			case 2:
 				Dialog.uConsol(con, AreaZon.list);
+				return -1;
+			case 3:
+				Dialog.uConsol(con, Room.list);
 				return -1;
 			default:
 				Loger.prne("Данный функционал находится в разработке (" + x + ")");

@@ -13,7 +13,7 @@ public class AreaZon implements Item {//область,зона
 
 	static public List<Item> list = new ArrayList<>();
 
-	private AreaZon(int idArea, int pipl, String titulArea) {//для тестировния
+	private AreaZon(int idArea, int pipl, String titulArea) {//для тестирования
 		this.idArea = idArea;
 		this.titulArea = titulArea;
 		this.pipl = pipl;
@@ -46,16 +46,16 @@ public class AreaZon implements Item {//область,зона
 
 
 	@Override
-	public String titul() { return titulArea; }
+	public String title() { return titulArea; }
 
 	@Override
-	public void setTitul(String x) { titulArea=x; }
+	public void setTitle(String x) { titulArea=x; }
 
-	@Override
-	public void printList() {
-		for (Item x:list ) { Loger.prnq(x.printLn()); }
-		Loger.prnq("---"+list.size());
-	}//printList
+//	@Override
+//	public void printList() {
+//		for (Item x:list ) { Loger.prnq(x.printLn()); }
+//		Loger.prnq("---"+list.size());
+//	}//printList
 
 	@Override
 	public String printLn() { return idArea+"\t( "+pipl+" )\t"+titulArea; }
@@ -64,6 +64,6 @@ public class AreaZon implements Item {//область,зона
 	public String printHd() { return "№\tлюдей\t\tНазвание зоны"; }
 
 	@Override
-	public String printTitul() { return "Зоны охраны объекта"; }
+	public String printTitle() { return "Зоны охраны объекта"; }
 
 }//class Area
