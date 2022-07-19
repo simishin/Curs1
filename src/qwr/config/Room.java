@@ -25,7 +25,7 @@ public class Room implements Item {
 	static int kClassRm;
 
 	static public List<Item> list = new ArrayList<>();
-	static public void init(){ list.add(new Room(0)); }//init
+	static public void init(){ list.add(new Room(0,0,0,"","")); }//init
 
 	static public XFields[] uField = new XFields[3];//список полей для генерации элементов
 	{//инициализация класса
@@ -42,13 +42,18 @@ public class Room implements Item {
 
 	public Room(int id){
 		idRoom=id;
-		this.floor = uField[1].let();
+//		this.floor = uField[1].let();
 		this.titleRoom = "";
-		this.kClassRom =uField[2].let();
-		this.bild = uField[0].let("");
-	}
+//		this.kClassRom =uField[2].let();
+//		this.bild = uField[0].let("");
+//Loger.logs(""+list.size());
+		Room y = (Room)list.get(0);
+		this.floor = uField[1].modify() ? y.floor : 0;
+		this.kClassRom = uField[2].modify() ? y.kClassRom : 0;
+		this.bild = uField[0].modify() ? y.bild : "";
+	}//Room(int id)
 
-	//для тестирования
+	//для инициализации и тестирования
 	public Room(int idRoom, int floor, int kClassRom, String bild, String titleRoom) {
 		this.idRoom = idRoom;
 		this.floor = floor;
@@ -56,18 +61,48 @@ public class Room implements Item {
 		this.kClassRom = kClassRom;
 		this.bild = bild;
 	}//---------------------------------------------------------------
+	/**
+	 * модификация элемента списка по шаблону, находящемся в нулевом элементе
+	 */
 	@Override
-	public void printDefine(){ XFields.printDefine(uField); }
+	public void update(){
+		Room y = (Room)list.get(0);
+		if (uField[1].modify()) this.floor = y.floor;
+		if (uField[2].modify()) this.kClassRom = y.kClassRom;
+		if (uField[0].modify()) this.bild = y.bild;
+	}//update---------------------------------------------------------
+//	public int floor(){return floor;}
+	/**
+	 * Выводит на экран установленные фильтры для конкретного списка элементов
+	 * Вызывается из Dialog.printDefine(List<Item> list)
+	 * и передает в XFields.printDefine(uField) массив данных нулевого элемента
+	 */
+	@Override
+	public void printDefine(){
+		assert this.idRoom == 0 : "Этот метод вызван не для нулевого элемента";
+		uField[0].let(kBild);
+		uField[1].let(kFloor);
+		uField[2].let(kClassRm);
+		XFields.printDefine(uField);
+	}//printDefine
+
+	/**
+	 * Вызывается из Dialog.editDef(Scanner con, List<Item> list, int index)
+	 * @param con консоль
+	 * @return транслирует данные из XFields.uConsol(con,uField,""), где
+	 * истина - выход на верхний уровень меню, лож- продолжение редактирования списка
+	 */
 	@Override
 	public boolean uConsol(Scanner con) {
 		Loger.logs(" idRoom:"+this.idRoom);
-//		uField[0].let(kBild);
-//		uField[1].let(kFloor);
-//		uField[2].let(kClassRm);
-		return XFields.uConsol(con,uField,"");
-//		kBild=uField[0].let(kBild);
-//		kFloor=uField[1].let(kFloor);
-//		kClassRm = uField[2].let(kClassRm);
+		uField[0].let(kBild);
+		uField[1].let(kFloor);
+		uField[2].let(kClassRm);
+		boolean z = XFields.uConsol(con,uField,"");
+		kBild=uField[0].lets();
+		kFloor=uField[1].let();
+		kClassRm = uField[2].let();
+		return z;
 	}//uConsol---------------------------------------------------------
 
 	public static void test() {//создание набора данных для тестирования

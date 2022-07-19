@@ -30,5 +30,15 @@ public interface Item {
 	 * @return истина - выход на верхний уровень меню, лож- продолжение редактирования списка
 	 */
 	default boolean uConsol(Scanner con) {return false;	}
+	/**
+	 * Выводит на экран установленные фильтры для конкретного списка элементов
+	 * Вызывается из Dialog.printDefine(List<Item> list)
+	 * и передает в XFields.printDefine(uField) массив данных нулевого элемента
+	 */
 	default void printDefine(){}
+
+	/**
+	 * модификация элемента списка по шаблону, находящемся в нулевом элементе
+	 */
+	default void update(){}
 }//Item

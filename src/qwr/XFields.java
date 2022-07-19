@@ -57,7 +57,8 @@ public class XFields {
 	 * @param con консоль
 	 * @param uField список полей
 	 * @param titul текст для вывода в шапке
-	 * @return действие после перебора параметров: истина - выход на верхний уровень меню, лож- продолжение редактирования списка
+	 * @return действие после перебора параметров:
+	 * истина - выход на верхний уровень меню, лож- продолжение редактирования списка
 	 */
 	public static boolean uConsol(Scanner con, XFields[] uField, String titul) {
 		Loger.logs("");
@@ -222,10 +223,10 @@ public class XFields {
 	public static void printDefine(XFields[] uField) {//печать одной странички из списка
 		assert uField.length>0 : "Начата обработка пустого списка параметров элемента (XFields.printSelect)";
 //		if (uField.length<1) return;
-		Loger.prnq("№ : Используется : Наименование параметра : Значение");
+		Loger.prnq(" ( №, Используется, Значение, Наименование параметра )");
 		for (int i = 0; i < uField.length; i++) {
 			assert uField[i] !=null : "Зарезервировано больше, чем описано параметров элемента ";
-			Loger.prnq((i+1)+"."+(uField[i].modify ? "+" : "-")+"\t"+uField[i].title+" :\t"+uField[i].putValue());
+			Loger.prnq((i+1)+".\t"+(uField[i].modify ? "<+>" : "(-)")+"   "+uField[i].putValue()+" :\t"+uField[i].title);
 		}
 //		Loger.prnq("Выберете поле для корректировки или 0 для выхода в главное меню, 9- вернуться"+(uField.length-1)+"\n");
 	}//printNext -------------------------------------------------------------------------
@@ -241,7 +242,9 @@ public class XFields {
 		return "";
 	}//putValue ------------------------------------------------------------------------
 
-	public String let(String x){ values=x; return modify ? values : x; }
-	public int let(int x){ valuei=x; return modify ? valuei : x; }
+	public void let(String x){ values=x; }
+	public String lets(){ return values; }
+	public void let(int x){ valuei=x; }
 	public int let(){return valuei;}
+	public boolean modify(){ return modify; }
 }//Fields

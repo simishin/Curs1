@@ -12,7 +12,7 @@ public class Dialog {
 	 * Редактирование списка элементов с вызовом adding(list,jbeg,jend) для
 	 * добавления элементов (+), removal(list,jbeg,jend) для удаления элементов (-),
 	 * editing(con,list,jend) для редактирования названия (%),
-	 * editDef(con,list, jend) для редактирования фильтра-предустановок (*).
+	 * editDef(con,list, jend) для редактирования шаблона (*).
 	 * Вызывается из Menu.action(Scanner con, int x),
 	 * где определяется конкретный список при вызове.
 	 * @param con консоль
@@ -20,9 +20,9 @@ public class Dialog {
 	 * @return зарезервировано для направления перехода в меню
 	 */
 	public static int uConsol(Scanner con, List<Item> list){
-		Loger.prnq("Создание элементов\n"+list.get(0).printTitle());//печать заголовка
+		Loger.prnq("Создание элементов :"+list.get(0).printTitle());//печать заголовка
 //		printFooter(list);
-		printDefine(list);
+//		printDefine(list);
 		String	qs;
 		int jbeg, jend;
 		label:
@@ -46,29 +46,42 @@ public class Dialog {
 					case 'q':
 					case '/': break label;
 					case ' ':
-
 						count=jbeg;
 						printNext(list);
 //						jbeg=0;
 						break;
-					case '+':  printQuant(adding(list,jbeg,jend),jbeg,jend); break;
+					case '+':
+						printQuant(adding(list,jbeg,jend),jbeg,jend);
+//						count=jbeg;
+						printNext(list);
+						break;
 					case '-':  printQuant(removal(list,jbeg,jend),jbeg,jend); break;
-					case '%':  if(editing(con,list,jbeg)) break label; else break;
-					case '*':  if(editDef(con,list, jbeg)) break label; else break;
+					case '%':  if(editTitl(con,list,jbeg)) break label; else break;
+					case '=':  if(editDef(con,list, jbeg)) break label; else break;
+					case '*':  if(stencil(con,list, jbeg,jend)) break label; else break;
+					case '?':	printHelp();	break;
 					default:
 				}//switch
 			} else printNext(list);
-			printDefine(list);
+			printDefine(list);//Печать шаблоны
 			printFooter(list);
 //			qs=con.next();// ввода до тех пор, пока не встретится разделитель (по умолчанию это пробел, но вы также можете его изменить)
 //			s=inp.nextLine();// сканирует ввод, пока мы не нажмем кнопку ввода, и не вернем все это целиком, и поместит курсор в следующую строку.
 		}//while
 		return 0;
-	}//consol
+	}//consol----------------------------------------------------------------
+
+
+	private static void printHelp(){
+		Loger.prnq(
+		"Для работы со списком используйте команды: +-для добавления, --удаления, _-просмотра списка, " +
+		"%-изменить наименования, =-редактирование, *-по шаблону, /-завершение");
+	}//printHelp ------------------------------------------------------------
+
 	private static void printDefine(List<Item> list){
-		Loger.prnq("Установлены фильтры");
+		Loger.prnt("Шаблон :");
 		list.get(0).printDefine();
-	}
+	}//printDefine
 
 	private static void printQuant(int quant, int jbeg, int jend){
 		int x= jend==0 ? 1 : jend - jbeg + 1;
@@ -84,16 +97,20 @@ public class Dialog {
 			if (count >= list.size()) { count=0; break; }
 			Loger.prnq(count+".\t"+list.get(count).printLn());
 		}
-		Loger.prnq("---"+count+"/"+list.size());
-	}//printNext
+		Loger.prnq("= "+count+"/"+(list.size()-1)+" =");
+	}//printNext ------------------------------------------------------------
 	private static void printFooter(List<Item> list){
-		Loger.prnq("Корректировка списка из "+(list.size()-1)+" элементов\n"+
-				"Введите команду: +-для добавления, --удаления, _-просмотра списка, " +
-				"%-редактирование наименования, *-редактирование по умолчанию, /-завершение");
+		Loger.prnq(
+//				"Корректировка списка из "+(list.size()-1)+" элементов\n"+
+				"Для работы со списком используйте команды: +-для добавления, --удаления, _-просмотра списка, " +
+				"%-изменить наименования, =-редактирование, *-по шаблону, /-завершение");
 	}//printFooter
 
 	private static int adding(List<Item> list, int jbeg, int jend) {
-		if (jbeg==0) return 0;
+		if (jbeg==0) {
+			if (addn(list, list.size())) return 1;
+			else return 0;
+		}
 		int z=0;
 		if (jend==0) if (addn(list, jbeg)) return 1;
 		else return 0;
@@ -133,11 +150,61 @@ public class Dialog {
 		return true;
 	}//remov-----------------------------------------------------------------
 	private static void printFooterEdit(){
-		Loger.prnq("Редактирование наименований элементов\n"+
-				"Команды: Ввод для перехода к следующему, +-редактирование " +
+		Loger.prnq("Для редактирования наименований используйте команды:\n"+
+				"Ввод для перехода к следующему, +-редактирование " +
 				", --переход в меню элементов, *-просмотра списка, /-завершение");
 	}//printFooter ---------------------------------------------------------
 
+	/**
+	 * Изменение элемента по трафарету.
+	 * При jbeg,jend==0 накладывается трафарет на текущий элемент и запрашивается
+	 * подтверждение и далее переходим к следующему;
+	 * При jend==0: делаю текущим jbeg, запрашиваю подтверждение, перехожу к следующему;
+	 * При jbeg,jend !=0, запрашиваю подтверждение и завершаю.
+	 * count=0;//указатель положения
+	 * @param con консоль
+	 * @param list список элементов для обработки
+	 * @param jbeg
+	 * @param jend
+	 * @return Истина-выход на уровень вверх, Лож - работа на текущем уровне
+	 */
+	private static boolean stencil(Scanner con, List<Item> list, int jbeg, int jend) {
+		if (jbeg>=list.size()){
+			Loger.prnq("Запись не существует.");
+			return false;
+		}
+		String	qs;
+		if (jend == 0){//поэлементно
+			if (jbeg !=0 ) count = jbeg;
+			Loger.prnq("Подтвердите изменение записи -<+>, пропустить-<->, завершить-</>:");
+			while (true) {
+				if (count >= list.size()) return false;
+				Loger.prnq("" + list.get(count).printLn() + "\n?");
+				qs = con.nextLine();
+				switch (qs.charAt(0)) {
+					case '*':
+//						printDefine( list);//печать шаблона
+						list.get(0).uConsol(con);
+						break;
+					case '/':
+						return false;
+					case '+':
+						list.get(count).update();
+					case '-': count++;
+				}//switch
+			}//while
+		} else { //изменение группы записей
+			Loger.prnq("Подтвердите изменение записей -<+> с "+jbeg+" по "+jend );
+			printDefine( list);//печать шаблона
+			qs = con.nextLine();
+			if (qs.charAt(0) != '+') return false;
+			for (int i = jbeg; i <= jend && i < list.size(); i++) {
+				list.get(i).update();
+			}
+			count = jend >= list.size() ? list.size() : jend;
+			return false;
+		}
+	}//stencil -------------------------------------------------------------------
 	/**
 	 * Редактирование параметров по умолчанию. Вызывается из локальной uConsol()
 	 * @param con консоль
@@ -151,7 +218,7 @@ public class Dialog {
 			Loger.prnq("Элемент <"+index+"> еще не создан. Создайте элемент.");
 			return false;
 		}
-		if (index==0) Loger.prnq("Редактирование параметров фильтра для элементов\n");
+		if (index==0) Loger.prnq("Редактирование параметров шаблона для элементов\n");
 		else Loger.prnq("Редактирование параметров элемента:"+index+" \n");
 		Loger.prnq(list.get(index).printTitle());
 
@@ -159,9 +226,20 @@ public class Dialog {
 		return list.get(index).uConsol(con);
 	}//editDef
 
-	private static boolean editing(Scanner con, List<Item> list, int index) {
-		Loger.prnq("Редактирование наименований элементов\n"+list.get(0).printTitle());//печать заголовка
-		if (list.size() < 2) return false;
+	/**
+	 * Редактирование названия элемента.
+	 * Вызывается из Dialog.uConsol(Scanner con, List<Item> list)
+	 * @param con консоль
+	 * @param list список элементов
+	 * @param index номер элемента для которого был сделан вызов метода
+	 * @return Истина - выход по 'q' и '%', Лож - выход по '/'
+	 */
+	private static boolean editTitl(Scanner con, List<Item> list, int index) {
+		Loger.prnq("Редактирование наименований : "+list.get(0).printTitle());//печать заголовка
+		if (list.size() < 2) {
+		Loger.prnq("Записи не созданы. Необходимо сначала создать список.");
+			return false;
+		}
 		printFooterEdit();
 		String	qs;
 
@@ -215,4 +293,23 @@ public class Dialog {
 		}//while
 	}//editing
 }//Dialog
+/*
+public static void ClearConsole(){
+        try{
+            String operatingSystem = System.getProperty("os.name") //Check the current operating system
+
+            if(operatingSystem.contains("Windows")){
+                ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "cls");
+                Process startProcess = pb.inheritIO.start();
+                startProcess.waitFor();
+            } else {
+                ProcessBuilder pb = new ProcessBuilder("clear");
+                Process startProcess = pb.inheritIO.start();
+                startProcess.waitFor();
+            }
+        }catch(Exception e){
+            System.out.println(e);
+        }
+    }
+ */
 
