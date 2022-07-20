@@ -32,6 +32,7 @@ public class Dialog {
 			jbeg=0;
 			jend=0;
 			if (qs.length() !=0) {
+				if (qs.charAt(0)>='0' && qs.charAt(0)<='9') jend = (qs.charAt(0) - '0');
 				for (int i = 1; i < qs.length(); i++) {
 					if (qs.charAt(i) >= '0' && qs.charAt(i) <= '9')
 						jend = jend * 10 + (qs.charAt(i) - '0');
@@ -41,7 +42,8 @@ public class Dialog {
 					} else if (jend != 0) break;
 				}
 				if (jbeg==0 && jend != 0) {jbeg = jend;	jend = 0;}
-				Loger.logs(" "+qs.charAt(0)+"="+jbeg+"-"+jend);
+	Loger.logs(" "+qs.charAt(0)+"="+jbeg+"-"+jend);
+				list.get(0).printTest();//********************************
 				switch (qs.charAt(0)) {
 					case 'q':
 					case '/': break label;
@@ -51,6 +53,7 @@ public class Dialog {
 //						jbeg=0;
 						break;
 					case '+':
+						list.get(0).printTest();//********************************
 						printQuant(adding(list,jbeg,jend),jbeg,jend);
 //						count=jbeg;
 						printNext(list);
@@ -60,6 +63,16 @@ public class Dialog {
 					case '=':  if(editDef(con,list, jbeg)) break label; else break;
 					case '*':  if(stencil(con,list, jbeg,jend)) break label; else break;
 					case '?':	printHelp();	break;
+					case '0':
+					case '1':
+					case '2':
+					case '3':
+					case '4':
+					case '5':
+					case '6':
+					case '7':
+					case '8':
+					case '9': count=jbeg; break;
 					default:
 				}//switch
 			} else printNext(list);
@@ -90,9 +103,14 @@ public class Dialog {
 
 	private static void printNext(List<Item> list) {//печать одной странички из списка
 		if (list.size()<1) return;
+		if (count >= list.size()) {
+			Loger.prnq("Элемент с номером "+count+" Еще не создан.");
+			count=list.size()-1;
+			return;
+		}
+		if (count < 0) count=0;
 		Loger.prnq("\t"+list.get(0).printHd());//печать заголовка таблицы
 		for (int i = 0; i < lines; i++) {
-			if (count < 0) count=0;
 			count++;
 			if (count >= list.size()) { count=0; break; }
 			Loger.prnq(count+".\t"+list.get(count).printLn());
@@ -106,6 +124,14 @@ public class Dialog {
 				"%-изменить наименования, =-редактирование, *-по шаблону, /-завершение");
 	}//printFooter
 
+	/**
+	 * Программа вызывается из uConsol(Scanner con, List<Item> list) при добавлении элемента
+	 * Вызывает addn(List<Item> list, int j)
+	 * @param list список элементов
+	 * @param jbeg номер начала группы элементов, нового одного элемента и 0- следующего нового
+	 * @param jend омер конечного нового элемента группы
+	 * @return количество фактически добавленных элементов с учетом возможного наложения
+	 */
 	private static int adding(List<Item> list, int jbeg, int jend) {
 		if (jbeg==0) {
 			if (addn(list, list.size())) return 1;
@@ -117,10 +143,21 @@ public class Dialog {
 		else
 			for (int i = jbeg; i <= jend ; i++) if (addn(list, i)) z++;
 		return z;
-	}//adding
+	}//adding---------------------------------------------------------------
+
+	/**
+	 * Проверяет номер на совпадение с существующим
+	 * Вызывается из uConsol(Scanner con, List<Item> list) посредством adding(List<Item> list, int jbeg, int jend)
+	 * Вызывает перегруженный метод добавление к списку в соответствующем классе с передачей номера
+	 * @param list список элементов
+	 * @param j номер нового элемента
+	 * @return Истина если начато добавление элемента и ЛОЖ если дублирование
+	 */
 	private static boolean addn(List<Item> list, int j){
-//		Loger.logs("j:"+j);
+		Loger.logs("j:"+j);
+		list.get(0).printTest();//********************************
 		for (Item x:list ) if (x.idItem()==j) return false;
+
 		Item y=list.get(0).addID(j);
 		if (y == null) return false;//Если не создалось
 		list.add(y);
@@ -181,17 +218,19 @@ public class Dialog {
 				if (count >= list.size()) return false;
 				Loger.prnq("" + list.get(count).printLn() + "\n?");
 				qs = con.nextLine();
-				switch (qs.charAt(0)) {
-					case '*':
-//						printDefine( list);//печать шаблона
-						list.get(0).uConsol(con);
-						break;
-					case '/':
-						return false;
-					case '+':
-						list.get(count).update();
-					case '-': count++;
-				}//switch
+				if (qs.length()>0)
+					switch (qs.charAt(0)) {
+						case '*':
+	//						printDefine( list);//печать шаблона
+							list.get(0).uConsol(con);
+							break;
+						case '/':
+							return false;
+						case '+':
+							list.get(count).update();
+						case '-': count++;
+					}//switch
+				else return false;
 			}//while
 		} else { //изменение группы записей
 			Loger.prnq("Подтвердите изменение записей -<+> с "+jbeg+" по "+jend );
@@ -292,7 +331,7 @@ public class Dialog {
 			printFooterEdit();
 		}//while
 	}//editing
-}//Dialog
+}//
 /*
 public static void ClearConsole(){
         try{

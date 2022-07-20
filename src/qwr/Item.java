@@ -16,7 +16,7 @@ public interface Item {
 	void setTitle(String x);
 	//создание нулевого элемента для работы меню генерации
 //	static void init() { Loger.logs("Этот метод должен быть переопределен в классе"); }
-
+	default void printTest(){}//для отладки
 	default void printList(){//для отладки
 		for (Item x:list ) { Loger.prnq(x.printLn()); }
 		Loger.prnq("---"+list.size());

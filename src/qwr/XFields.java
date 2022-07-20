@@ -69,20 +69,20 @@ public class XFields {
 			Loger.prnq("Выберете номер поля или 0,/- для выхода в главное меню, 9,*,+,-- вернуться ("+(uField.length)+")\n");
 			try {
 				int y = con.nextInt();
-				if (y==0) return true;
+				if (y==0) return false;
 				if (y==9) return false;
 				if(y>0 && y<=uField.length){
 					do {
 						q = editValue(con,uField[y-1]);
-						if (q==-1) return false;
+						if (q==-1) break;
 						y++;
 					} while (q==1 && y<uField.length);
 				} else Loger.prnq("Ошибка выбора. Повторите.");
 			} catch (InputMismatchException ex) {
 				switch (con.next().charAt(0)) {
 					case 'q':
-					case '/':
 						return true;
+					case '/':
 					case '*':
 					case '-':
 					case '+':
@@ -154,8 +154,8 @@ public class XFields {
 
 					switch (y.charAt(0)) {
 						case 'q':
-						case '/':
 							return -1;
+						case '/':
 						case '*':
 							return 0;
 						case '+':
@@ -197,8 +197,8 @@ public class XFields {
 					} catch (InputMismatchException ex) {
 						switch (con.next().charAt(0)) {
 							case 'q':
-							case '/':
 								return -1;
+							case '/':
 							case '*':
 								return 0;
 							case '+':

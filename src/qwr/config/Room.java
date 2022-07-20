@@ -39,14 +39,20 @@ public class Room implements Item {
 //	}
 	//---------------------------------------------------------------
 //	public Room(int id) { idRoom=id; }
-
+	@Override
+	public void printTest(){
+//		Room y = (Room)list.get(0);
+		Loger.prnq(">>>>>>"+uField[0].modify()+"\t"+uField[1].modify()+"\t"+uField[2].modify());
+	}//printTest
 	public Room(int id){
+		Loger.logs("+++");
+		printTest();//********************************
 		idRoom=id;
 //		this.floor = uField[1].let();
 		this.titleRoom = "";
 //		this.kClassRom =uField[2].let();
 //		this.bild = uField[0].let("");
-//Loger.logs(""+list.size());
+Loger.logs(""+uField[0].modify()+"\t"+uField[1].modify()+"\t"+uField[2].modify());
 		Room y = (Room)list.get(0);
 		this.floor = uField[1].modify() ? y.floor : 0;
 		this.kClassRom = uField[2].modify() ? y.kClassRom : 0;
@@ -129,9 +135,18 @@ public class Room implements Item {
 	@Override
 	public int idItem() { return idRoom; }
 
+	/**
+	 * Вызывается из Dialog.addn(List<Item> list, int j)
+	 * Вызывает конструктор данного класса new Room(id)
+	 * @param id номер нового элемента
+	 * @return созданный элемент списка с заданным номером
+	 */
 	@Override
 //	public Item addID(int id) { return null; }
-	public Item addID(int id) { return new Room(id); }
+	public Item addID(int id) {
+		Loger.logs("");
+		printTest();//************************************
+		return new Room(id); }
 	@Override
 	public String title() { return titleRoom; }
 
