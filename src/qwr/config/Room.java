@@ -13,69 +13,62 @@ import java.util.Scanner;
  */
 public class Room implements Item {
 
-	String[] uClassRom ={"А","Б","В","Г"};
+	static String[] uClassRom ={"А","Б","В","Г"};
 	int kClassRom;	//класс пожарной безопасности
 	int idRoom;
 	int floor;//этаж
 	String titleRoom;//наименование помещения
 	String	bild;//здание
 
-	static String kBild;//здание
-	static int kFloor;//этаж
-	static int kClassRm;
-
 	static public List<Item> list = new ArrayList<>();
 	static public void init(){ list.add(new Room(0,0,0,"","")); }//init
 
 	static public XFields[] uField = new XFields[3];//список полей для генерации элементов
-	{//инициализация класса
+	static {//инициализация класса
 		uField[0] =new XFields(1, XFields.Typ.STRING,"Здание","",1,35);
 		uField[1] =new XFields(1, XFields.Typ.INT,"Этаж","",-9,25);
 		uField[2] =new XFields(1, XFields.Typ.ENUM,"Класс пожарной безопасности","", uClassRom);
 	}//инициализация класса
-//	private static String enumToString(){
-//		String z=""; for (ClassRom y: ClassRom.values() ) { z = z +y +"\t"; }
-//		return z;
-//	}
-	//---------------------------------------------------------------
-//	public Room(int id) { idRoom=id; }
-	@Override
-	public void printTest(){
-//		Room y = (Room)list.get(0);
-		Loger.prnq(">>>>>>"+uField[0].modify()+"\t"+uField[1].modify()+"\t"+uField[2].modify());
-	}//printTest
-	public Room(int id){
-		Loger.logs("+++");
-		printTest();//********************************
-		idRoom=id;
-//		this.floor = uField[1].let();
-		this.titleRoom = "";
-//		this.kClassRom =uField[2].let();
-//		this.bild = uField[0].let("");
-Loger.logs(""+uField[0].modify()+"\t"+uField[1].modify()+"\t"+uField[2].modify());
-		Room y = (Room)list.get(0);
-		this.floor = uField[1].modify() ? y.floor : 0;
-		this.kClassRom = uField[2].modify() ? y.kClassRom : 0;
-		this.bild = uField[0].modify() ? y.bild : "";
-	}//Room(int id)
 
+	public XFields[] uField(){return uField;}
 	//для инициализации и тестирования
 	public Room(int idRoom, int floor, int kClassRom, String bild, String titleRoom) {
 		this.idRoom = idRoom;
-		this.floor = floor;
+		this.floor = floor;//этаж
 		this.titleRoom = titleRoom;
 		this.kClassRom = kClassRom;
 		this.bild = bild;
 	}//---------------------------------------------------------------
+	/**
+	 * Вызывается из Dialog.addn(List<Item> list, int j)
+	 * Вызывает конструктор данного класса new Room(id)
+	 * @param id номер нового элемента
+	 * @return созданный элемент списка с заданным номером
+	 */
+	@Override
+	public Item addID(int id) {
+		Room y = (Room)list.get(0);
+		Loger.logs(""+uField[2].isUse()+"   "+y.bild);
+		String x0= uField[0].isUse() ? y.bild : "";//этаж
+		int	x1 = uField[1].isUse() ? y.floor : 0;
+		int x2 = uField[2].isUse() ? y.kClassRom : 0;
+		return new Room(id,x1,x2,x0,"");
+	}
+
+//	@Override
+//	public void printTest(){
+//		Loger.prnq(">>>>>>"+uField[0].isUse()+"\t"+uField[1].isUse()+"\t"+uField[2].isUse());
+//	}//printTest --------------------------------------------------------------------
+
 	/**
 	 * модификация элемента списка по шаблону, находящемся в нулевом элементе
 	 */
 	@Override
 	public void update(){
 		Room y = (Room)list.get(0);
-		if (uField[1].modify()) this.floor = y.floor;
-		if (uField[2].modify()) this.kClassRom = y.kClassRom;
-		if (uField[0].modify()) this.bild = y.bild;
+		if (uField[0].isUse()) this.bild = y.bild;
+		if (uField[1].isUse()) this.floor = y.floor;
+		if (uField[2].isUse()) this.kClassRom = y.kClassRom;
 	}//update---------------------------------------------------------
 //	public int floor(){return floor;}
 	/**
@@ -84,12 +77,13 @@ Loger.logs(""+uField[0].modify()+"\t"+uField[1].modify()+"\t"+uField[2].modify()
 	 * и передает в XFields.printDefine(uField) массив данных нулевого элемента
 	 */
 	@Override
-	public void printDefine(){
+	public void prnStencil(){
 		assert this.idRoom == 0 : "Этот метод вызван не для нулевого элемента";
-		uField[0].let(kBild);
-		uField[1].let(kFloor);
-		uField[2].let(kClassRm);
-		XFields.printDefine(uField);
+		Room y = (Room)list.get(0);
+		uField[0].let(y.bild);
+		uField[1].let(y.floor);
+		uField[2].let(y.kClassRom);
+		XFields.prnStencil(uField);
 	}//printDefine
 
 	/**
@@ -101,14 +95,19 @@ Loger.logs(""+uField[0].modify()+"\t"+uField[1].modify()+"\t"+uField[2].modify()
 	@Override
 	public boolean uConsol(Scanner con) {
 		Loger.logs(" idRoom:"+this.idRoom);
-		uField[0].let(kBild);
-		uField[1].let(kFloor);
-		uField[2].let(kClassRm);
-		boolean z = XFields.uConsol(con,uField,"");
-		kBild=uField[0].lets();
-		kFloor=uField[1].let();
-		kClassRm = uField[2].let();
-		return z;
+		Room y = (Room)this;
+		uField[0].let(y.bild);
+		uField[1].let(y.floor);
+		uField[2].let(y.kClassRom);
+		boolean q = XFields.uConsol(con,uField,"");
+		y.bild=uField[0].lets();
+		y.floor=uField[1].let();
+		y.kClassRom = uField[2].let();
+		Room z = (Room)list.get(0);
+		z.bild=uField[0].lets();
+		z.floor=uField[1].let();
+		z.kClassRom = uField[2].let();
+		return q;
 	}//uConsol---------------------------------------------------------
 
 	public static void test() {//создание набора данных для тестирования
@@ -124,10 +123,10 @@ Loger.logs(""+uField[0].modify()+"\t"+uField[1].modify()+"\t"+uField[2].modify()
 
 	@Override
 	public String printLn() {
-		return idRoom+"\t"+floor+"\t"+ titleRoom +"\t"+uClassRom[kClassRom]+"\t"+bild; }
+		return idRoom+"\t"+floor+"\t- "+ titleRoom +" -\t"+uClassRom[kClassRom]+"\t"+bild; }
 
 	@Override
-	public String printHd() { return "#\tЭтаж\tнаименование\tКласс\tздание"; }
+	public String printHd() { return "#\tЭтаж\t- наименование -\tКласс\tздание"; }
 
 	@Override
 	public String printTitle() { return "Помещения объекта"; }
@@ -135,18 +134,6 @@ Loger.logs(""+uField[0].modify()+"\t"+uField[1].modify()+"\t"+uField[2].modify()
 	@Override
 	public int idItem() { return idRoom; }
 
-	/**
-	 * Вызывается из Dialog.addn(List<Item> list, int j)
-	 * Вызывает конструктор данного класса new Room(id)
-	 * @param id номер нового элемента
-	 * @return созданный элемент списка с заданным номером
-	 */
-	@Override
-//	public Item addID(int id) { return null; }
-	public Item addID(int id) {
-		Loger.logs("");
-		printTest();//************************************
-		return new Room(id); }
 	@Override
 	public String title() { return titleRoom; }
 

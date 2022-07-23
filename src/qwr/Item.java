@@ -35,8 +35,8 @@ public interface Item {
 	 * Вызывается из Dialog.printDefine(List<Item> list)
 	 * и передает в XFields.printDefine(uField) массив данных нулевого элемента
 	 */
-	default void printDefine(){}
-
+	default void prnStencil(){}
+default XFields[] uField(){return null;}
 	/**
 	 * модификация элемента списка по шаблону, находящемся в нулевом элементе
 	 */

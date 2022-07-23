@@ -1,6 +1,7 @@
 package qwr;
 
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -10,17 +11,17 @@ public class XFields {
 	private static int count=0;
 
 	public enum Typ{INT,STRING,ENUM}
-	int idMenu;
-	int id;
-	Typ typ;
-	String title;
-	String descript;
-	String values;
-	String[] arrValue;
-	int		valuei;
-	int		valMin;
-	int		valMax;
-	boolean	modify;//использовать при модификации записи или оставить без изменения данное поле
+	private int idMenu;
+	private int id;
+	private Typ typ;
+	private String title;
+	private String descript;
+	private String values;
+	private String[] arrValue;
+	private int		valuei;
+	private int		valMin;
+	private int		valMax;
+	private boolean use;//использовать при модификации записи или оставить без изменения данное поле
 
 	public XFields(int idMenu, Typ typ, String title, String descript, int valMin, int valMax) {
 		this.id = count++;
@@ -32,7 +33,7 @@ public class XFields {
 		this.valuei = 0;
 		this.valMin = valMin;
 		this.valMax = valMax;
-		this.modify = false;
+		this.use = false;
 		this.arrValue=null;
 	}//XFields=======================================================================
 
@@ -45,7 +46,7 @@ public class XFields {
 		this.values = "";
 		this.valuei = 0;
 		this.valMin = 1;
-		this.modify = false;
+		this.use = false;
 		arrValue= arrVal;
 		this.valMax = arrVal.length;
 	}//XFields=======================================================================
@@ -108,7 +109,7 @@ public class XFields {
 				Loger.prnq("Введите значение "+uField.title+" в диапазоне от "+uField.valMin
 						+" до "+uField.valMax+" или :" +
 						"\n/- для выхода, *-выход к списку, --отключение и следующий, +- включение и следующий");
-				Loger.prnq("Значение параметра используется при корректировке: "+(uField.modify ? "Да" : "НЕТ"));
+				Loger.prnq("Значение параметра используется при корректировке: "+(uField.use ? "Да" : "НЕТ"));
 				Loger.prnq("текущее значение :"+uField.valuei);
 				Loger.prnq("Описание параметра: "+uField.descript);
 //				Loger.prnq("{ /- для выхода, *-отключение и выход к списку, --отключение и следующий, +- включение и следующий }"+"\n------- ?");
@@ -117,7 +118,7 @@ public class XFields {
 						int y = con.nextInt();
 						Loger.logs("="+y);
 						if (y >= uField.valMin && y <= uField.valMax) {
-							uField.modify = true;
+							uField.use = true;
 							uField.valuei = y;
 							return 0;
 						}
@@ -131,10 +132,10 @@ public class XFields {
 							case '*':
 									return 0;//выход к списку параметров
 							case '+':
-									uField.modify = true;
+									uField.use = true;
 									return 1;//следующий параметр
 							case '-':
-									uField.modify = false;
+									uField.use = false;
 									return 1;//следующий параметр
 							default:
 						}//switch
@@ -145,7 +146,7 @@ public class XFields {
 				Loger.prnq("Введите текст "+uField.title+" длинной от "+uField.valMin
 						+" до "+uField.valMax+" или :" +
 						"\n/- для выхода, *-выход к списку, --отключение и следующий, +- включение и следующий");
-				Loger.prnq("Значение параметра используется при корректировке: "+(uField.modify ? "Да" : "НЕТ"));
+				Loger.prnq("Значение параметра используется при корректировке: "+(uField.use ? "Да" : "НЕТ"));
 				Loger.prnq("текущее значение :"+uField.values);
 				Loger.prnq("Описание параметра: "+uField.descript);
 				while (true){
@@ -159,15 +160,15 @@ public class XFields {
 						case '*':
 							return 0;
 						case '+':
-							uField.modify = true;
+							uField.use = true;
 							return 1;
 						case '-':
-							uField.modify = false;
+							uField.use = false;
 							return 1;
 						default:
 					}//switch
 					if (y.length() >= uField.valMin && y.length() <= uField.valMax) {
-						uField.modify = true;
+						uField.use = true;
 						uField.values = y;
 						return 0;
 					}
@@ -177,7 +178,7 @@ public class XFields {
 			case ENUM -> {
 				Loger.prnq("Выберете значение параметра "+uField.title+" из списка  или :" +
 						"\n/- для выхода, *-выход к списку, --отключение и следующий, +- включение и следующий");
-				Loger.prnq("Значение параметра используется при корректировке: "+(uField.modify ? "Да" : "НЕТ"));
+				Loger.prnq("Значение параметра используется при корректировке: "+(uField.use ? "Да" : "НЕТ"));
 				Loger.prnq("текущее значение :"+uField.arrValue[uField.valuei].toString());
 				Loger.prnq("Описание параметра: "+uField.descript+"\n Список допустимых значений:");
 				for (int i = 0; i < uField.arrValue.length; i++) {
@@ -189,7 +190,7 @@ public class XFields {
 						Loger.logs("="+y);
 						if (y==0) return -1;
 						if (y >= uField.valMin && y <= uField.valMax) {
-							uField.modify = true;
+							uField.use = true;
 							uField.valuei = y-1;
 							return 0;
 						}
@@ -202,10 +203,10 @@ public class XFields {
 							case '*':
 								return 0;
 							case '+':
-								uField.modify = true;
+								uField.use = true;
 								return 1;
 							case '-':
-								uField.modify = false;
+								uField.use = false;
 								return 1;
 							default:
 						}//switch
@@ -216,17 +217,26 @@ public class XFields {
 		return 0;
 	}//editValue --------------------------------------------------------------------
 
-	/**
-	 * Печать списка параметров элемента. Вызывается из локальной uConsol()
-	 * @param uField список параметров элемента
-	 */
+	public static void prnStencil(XFields[] uField){
+		assert uField.length>0 : "Начата обработка пустого списка параметров элемента (XFields.printSelect)";
+		Loger.prnq(" ( №, Используется, Значение, Наименование параметра )");
+		for (int i = 0; i < uField.length; i++) {
+			assert uField[i] !=null : "Зарезервировано больше, чем описано параметров элемента ";
+			Loger.prnq("\t"+(uField[i].use ? "<+>" : "(-)")+"   "+uField[i].putValue()+" :\t"+uField[i].title);
+		}//for
+	}//prnStencil
+
+		/**
+		 * Печать списка параметров элемента. Вызывается из локальной uConsol()
+		 * @param uField список параметров элемента
+		 */
 	public static void printDefine(XFields[] uField) {//печать одной странички из списка
 		assert uField.length>0 : "Начата обработка пустого списка параметров элемента (XFields.printSelect)";
 //		if (uField.length<1) return;
 		Loger.prnq(" ( №, Используется, Значение, Наименование параметра )");
 		for (int i = 0; i < uField.length; i++) {
 			assert uField[i] !=null : "Зарезервировано больше, чем описано параметров элемента ";
-			Loger.prnq((i+1)+".\t"+(uField[i].modify ? "<+>" : "(-)")+"   "+uField[i].putValue()+" :\t"+uField[i].title);
+			Loger.prnq((i+1)+".\t"+(uField[i].use ? "<+>" : "(-)")+"   "+uField[i].putValue()+" :\t"+uField[i].title);
 		}
 //		Loger.prnq("Выберете поле для корректировки или 0 для выхода в главное меню, 9- вернуться"+(uField.length-1)+"\n");
 	}//printNext -------------------------------------------------------------------------
@@ -246,5 +256,5 @@ public class XFields {
 	public String lets(){ return values; }
 	public void let(int x){ valuei=x; }
 	public int let(){return valuei;}
-	public boolean modify(){ return modify; }
+	public boolean isUse(){ return use; }//использовать
 }//Fields

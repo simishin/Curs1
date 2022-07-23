@@ -27,7 +27,7 @@ public class Dialog {
 		int jbeg, jend;
 		label:
 		while (true){
-
+			Loger.logs("Создание элементов");
 			qs=con.nextLine();
 			jbeg=0;
 			jend=0;
@@ -43,19 +43,15 @@ public class Dialog {
 				}
 				if (jbeg==0 && jend != 0) {jbeg = jend;	jend = 0;}
 	Loger.logs(" "+qs.charAt(0)+"="+jbeg+"-"+jend);
-				list.get(0).printTest();//********************************
 				switch (qs.charAt(0)) {
 					case 'q':
 					case '/': break label;
 					case ' ':
 						count=jbeg;
 						printNext(list);
-//						jbeg=0;
 						break;
 					case '+':
-						list.get(0).printTest();//********************************
 						printQuant(adding(list,jbeg,jend),jbeg,jend);
-//						count=jbeg;
 						printNext(list);
 						break;
 					case '-':  printQuant(removal(list,jbeg,jend),jbeg,jend); break;
@@ -77,23 +73,22 @@ public class Dialog {
 				}//switch
 			} else printNext(list);
 			printDefine(list);//Печать шаблоны
-			printFooter(list);
+			printFooter();
 //			qs=con.next();// ввода до тех пор, пока не встретится разделитель (по умолчанию это пробел, но вы также можете его изменить)
 //			s=inp.nextLine();// сканирует ввод, пока мы не нажмем кнопку ввода, и не вернем все это целиком, и поместит курсор в следующую строку.
 		}//while
 		return 0;
 	}//consol----------------------------------------------------------------
 
-
 	private static void printHelp(){
 		Loger.prnq(
 		"Для работы со списком используйте команды: +-для добавления, --удаления, _-просмотра списка, " +
-		"%-изменить наименования, =-редактирование, *-по шаблону, /-завершение");
+		"%-изменить наименования, =-редактирование, *-изменить по шаблону, /-завершение");
 	}//printHelp ------------------------------------------------------------
 
 	private static void printDefine(List<Item> list){
 		Loger.prnt("Шаблон :");
-		list.get(0).printDefine();
+		list.get(0).prnStencil();
 	}//printDefine
 
 	private static void printQuant(int quant, int jbeg, int jend){
@@ -117,9 +112,8 @@ public class Dialog {
 		}
 		Loger.prnq("= "+count+"/"+(list.size()-1)+" =");
 	}//printNext ------------------------------------------------------------
-	private static void printFooter(List<Item> list){
+	private static void printFooter(){
 		Loger.prnq(
-//				"Корректировка списка из "+(list.size()-1)+" элементов\n"+
 				"Для работы со списком используйте команды: +-для добавления, --удаления, _-просмотра списка, " +
 				"%-изменить наименования, =-редактирование, *-по шаблону, /-завершение");
 	}//printFooter
@@ -155,7 +149,7 @@ public class Dialog {
 	 */
 	private static boolean addn(List<Item> list, int j){
 		Loger.logs("j:"+j);
-		list.get(0).printTest();//********************************
+//		list.get(0).printTest();//********************************
 		for (Item x:list ) if (x.idItem()==j) return false;
 
 		Item y=list.get(0).addID(j);
@@ -201,8 +195,8 @@ public class Dialog {
 	 * count=0;//указатель положения
 	 * @param con консоль
 	 * @param list список элементов для обработки
-	 * @param jbeg
-	 * @param jend
+	 * @param jbeg первый элемент
+	 * @param jend последний элемент
 	 * @return Истина-выход на уровень вверх, Лож - работа на текущем уровне
 	 */
 	private static boolean stencil(Scanner con, List<Item> list, int jbeg, int jend) {
@@ -210,6 +204,7 @@ public class Dialog {
 			Loger.prnq("Запись не существует.");
 			return false;
 		}
+		printDefine( list);//печать шаблона
 		String	qs;
 		if (jend == 0){//поэлементно
 			if (jbeg !=0 ) count = jbeg;
@@ -217,6 +212,7 @@ public class Dialog {
 			while (true) {
 				if (count >= list.size()) return false;
 				Loger.prnq("" + list.get(count).printLn() + "\n?");
+				Loger.logs("поэлементно");
 				qs = con.nextLine();
 				if (qs.length()>0)
 					switch (qs.charAt(0)) {
@@ -234,7 +230,8 @@ public class Dialog {
 			}//while
 		} else { //изменение группы записей
 			Loger.prnq("Подтвердите изменение записей -<+> с "+jbeg+" по "+jend );
-			printDefine( list);//печать шаблона
+//			printDefine( list);//печать шаблона
+			Loger.logs("изменение группы записей");
 			qs = con.nextLine();
 			if (qs.charAt(0) != '+') return false;
 			for (int i = jbeg; i <= jend && i < list.size(); i++) {
@@ -257,11 +254,12 @@ public class Dialog {
 			Loger.prnq("Элемент <"+index+"> еще не создан. Создайте элемент.");
 			return false;
 		}
+		Loger.logs("index:"+index);
 		if (index==0) Loger.prnq("Редактирование параметров шаблона для элементов\n");
 		else Loger.prnq("Редактирование параметров элемента:"+index+" \n");
 		Loger.prnq(list.get(index).printTitle());
 
-//		Loger.logs("index:"+index);
+//
 		return list.get(index).uConsol(con);
 	}//editDef
 
