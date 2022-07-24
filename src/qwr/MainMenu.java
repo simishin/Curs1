@@ -2,34 +2,29 @@ package qwr;
 
 import qwr.config.AreaZon;
 import qwr.config.Room;
+import qwr.config.SensoRoom;
 import qwr.config.VSensor;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-/**
- * пользовательский диалог
- */
-record Menu(int jItem, int jNext, int level, String uTitle) {
+public record MainMenu(int jItem, int jNext, int level, String uTitle) {
 	private static int jSelect = 0;//текущая позиция
 	public static int rights = 1; //права
-	private static final Menu[] uTreeMenu = new Menu[65];
+	private static final MainMenu[] uTreeMenu = new MainMenu[65];
 
 	public static void consol() {
-		Menu.init();
+		init();
 		Main.u.log("--Dialog--");
 		Scanner con = new Scanner(System.in);
 		Loger.prnq("Вас приветствует Курсовая по JAVA\n текущий уровень доступа: " + rights);
 		while (true) {
-			Menu.print();
+			print();
 			try {
-				int y = action(con, Menu.next(con.nextInt()));
-				if (y >= 0) jSelect = y;
-				else if (y == -2) previous();
-				else if (y == -3) break;
+				if (actions(con,con.nextInt())) break;
 			} catch (InputMismatchException ex) {
 				if (con.next().equals("q")) break;
-				if (con.next().equals("/")) previous();
+				if (con.next().equals("/"))  { if (jSelect != 0) jSelect /= 10; }
 				Loger.prne("Error, повторите ввод 'q'\n");
 			}//catch
 		}//while
@@ -41,29 +36,25 @@ record Menu(int jItem, int jNext, int level, String uTitle) {
 
 	private static void add(int jItem, int jNext, int level, String uTitle) {
 		assert jSelect < uTreeMenu.length : "Превышение размера массива меню при инициализации. " + uTreeMenu.length;
-		uTreeMenu[jSelect] = new Menu(jItem, jNext, level, uTitle);
+		uTreeMenu[jSelect] = new MainMenu(jItem, jNext, level, uTitle);
 		jSelect++;
 	}//add
 
 	private static void print() {
-		for (Menu x : Menu.uTreeMenu)
-			if (x.jItem == Menu.jSelect) {
+		for (MainMenu x : uTreeMenu)
+			if (x.jItem == jSelect) {
 				Loger.prnq("Меню: " + x.jItem + " ---" + x.uTitle + "--- ( Уровень доступа " + rights + ")");
 				break;
 			}
-		for (Menu x : Menu.uTreeMenu) {
+		for (MainMenu x : uTreeMenu) {
 			if (x == null) break;
-			if (x.jItem == Menu.jSelect) continue;
+			if (x.jItem == jSelect) continue;
 			if (x.level > rights) continue;//пропускаю если не хватает прав
-			if (x.jItem / 10 == Menu.jSelect)
+			if (x.jItem / 10 == jSelect)
 				Loger.prnq(x.jItem % 10 + ". " + x.uTitle);
 		}
 		Loger.prnq("---\nДля возврата на верхний уровень - 9, а в главное меню - 0 \n?");
 	}//print-----------------------------------------------------------------------
-
-	private static void previous() {
-		if (Menu.jSelect != 0) Menu.jSelect /= 10;
-	}
 
 	private static void init() {
 		add(0, 0, "Главное меню");
@@ -131,39 +122,9 @@ record Menu(int jItem, int jNext, int level, String uTitle) {
 		add(57, 0, "Квитирование \"жизни\" оператора. (АРМ оператора, администратора)");
 		add(8, 2, "ОТЛАДКА кода программы (вызов 1)");
 		add(9, 1, "Завершение работы программы");
-		Loger.logs(Menu.jSelect + " Количество строк меню");
-		Menu.jSelect = 0;
+		Loger.logs(jSelect + " Количество строк меню");
+		jSelect = 0;
 	}//init
-
-	/**
-	 * Анализ введенной строки с консоли
-	 * Вызывается из consol()
-	 * @param j число введённое с консоли
-	 * @return номер следующей строки меню или -1=ни чего не делать, -2 =подняться вверх, -3 Завершение работы
-	 */
-	private static int next(int j) {
-		if (j == 0) {
-			Menu.jSelect = 0;
-			return 0;
-		}
-		if (j == 9 && Menu.jSelect != 0) {
-			Menu.jSelect /= 10;
-			return 0;
-		}
-		int y = Menu.jSelect * 10 + j;
-//		Loger.logs("~~"+j+"  "+y);
-		for (Menu x : Menu.uTreeMenu) {
-			if (x == null) return -2;
-			if (x.level > rights) return -3;//пропускаю если не хватает прав
-			if (x.jItem == y) {
-				if (x.jNext > 0) return x.jNext;
-				Menu.jSelect = y;
-				return 0;
-			}
-		}
-		return -1;
-	}//next---------------------------------------------------------------------------
-
 	/**
 	 * Выполнение действий по выбранному пункту меню
 	 * @param con консоль для передачи потомкам
@@ -175,7 +136,7 @@ record Menu(int jItem, int jNext, int level, String uTitle) {
 		if (x == 9 && jSelect != 0) { jSelect /= 10;return false; }
 		if (x < 0) return false;//игнорирую выбор, жду следующего
 		int y = jSelect * 10 + x;
-		for (Menu j : uTreeMenu) {
+		for (MainMenu j : uTreeMenu) {
 			if (j == null) return false;
 			if (j.level > rights) return false;//пропускаю если не хватает прав
 			if (j.jItem == y) { jSelect = y; break; }//нашел
@@ -186,43 +147,17 @@ record Menu(int jItem, int jNext, int level, String uTitle) {
 			case 111: 	z=Dialog.uConsol(con, VSensor.list);break;
 			case 16: 	z=Dialog.uConsol(con, Room.list); break;
 			case 121:	z=Dialog.uConsol(con, AreaZon.list); break;
-			case 9:		if (jSelect == 0) return true;//Завершение работы
+			case 112:	z=Dialog.uConsol(con, SensoRoom.list); break;
+			case 9:		return true;//Завершение работы
 			case 8:
 		}//switch
 		switch (z){
 			case -1:	jSelect  = uTreeMenu[x].jNext;
-						return false;
+				return false;
 			case -2:	if (jSelect != 0) jSelect /= 10;
-						return false;
+				return false;
 			case -3:	return true;//Завершение работы
 		}//switch
 		return false;
 	}//action
-	/**
-	 * Выбор действия по меню
-	 *
-	 * @param con передача консоли для использовании
-	 * @param x   номер действия из инициализации меню
-	 * @return номер строки меню при возврате, -1 на месте, -2 на уровень выше, -3 Завершение работы
-	 */
-	private static int action(Scanner con, int x) {
-		if (x <= 0) return -1;//игнорирую выбор, жду следующего
-		Loger.logs("% " + x);
-		switch (x) {
-			case 1:
-				return -3;//Завершение работы
-			case 2:
-				Dialog.uConsol(con, AreaZon.list);
-				return -1;
-			case 3:
-				Dialog.uConsol(con, Room.list);
-				return -1;
-			case 4:
-				Dialog.uConsol(con, VSensor.list);
-				return -1;
-			default:
-				Loger.prne("Данный функционал находится в разработке (" + x + ")");
-				return -1;
-		}//switch
-	}//action
-}//Menu==================================================================================
+}//record MainMenu

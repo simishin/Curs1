@@ -49,7 +49,7 @@ public class AreaZon implements Item {//область,зона
 	public String title() { return titulArea; }
 
 	@Override
-	public void setTitle(String x) { titulArea=x; }
+	public void setTitle(int j, String x) { titulArea=x; }
 
 //	@Override
 //	public void printList() {

@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) {
 		AreaZon.init();
 		Room.init();
-
+		VSensor.init();
     	Menu.consol();
 //	    Dialog.consol();
     }//main -----------------------------------------------------------------------
@@ -95,13 +95,6 @@ public class Main {
 enum TypeSensor{
 
 }//TypeSensor
-
-class ActivVSensor extends VSensor {
-
-}//ActivSensor
-class PassivVSensor extends VSensor {
-
-}//class PassivSensor
 
 abstract class Actions{
 

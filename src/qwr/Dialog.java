@@ -48,11 +48,11 @@ public class Dialog {
 					case '/': break label;
 					case ' ':
 						count=jbeg;
-						printNext(list);
+						count=printNext(count,list);
 						break;
 					case '+':
 						printQuant(adding(list,jbeg,jend),jbeg,jend);
-						printNext(list);
+						count=printNext(count,list);
 						break;
 					case '-':  printQuant(removal(list,jbeg,jend),jbeg,jend); break;
 					case '%':  if(editTitl(con,list,jbeg)) break label; else break;
@@ -71,7 +71,7 @@ public class Dialog {
 					case '9': count=jbeg; break;
 					default:
 				}//switch
-			} else printNext(list);
+			} else count=printNext(count,list);
 			printDefine(list);//Печать шаблоны
 			printFooter();
 //			qs=con.next();// ввода до тех пор, пока не встретится разделитель (по умолчанию это пробел, но вы также можете его изменить)
@@ -96,12 +96,12 @@ public class Dialog {
 		Loger.prnq("Обработано "+quant+" из "+x);
 	}//printQuant
 
-	private static void printNext(List<Item> list) {//печать одной странички из списка
-		if (list.size()<1) return;
+	public static int printNext(int count, List<Item> list) {//печать одной странички из списка
+		if (list.size()<1) return 0;
 		if (count >= list.size()) {
 			Loger.prnq("Элемент с номером "+count+" Еще не создан.");
 			count=list.size()-1;
-			return;
+			return count;
 		}
 		if (count < 0) count=0;
 		Loger.prnq("\t"+list.get(0).printHd());//печать заголовка таблицы
@@ -111,6 +111,7 @@ public class Dialog {
 			Loger.prnq(count+".\t"+list.get(count).printLn());
 		}
 		Loger.prnq("= "+count+"/"+(list.size()-1)+" =");
+		return count;
 	}//printNext ------------------------------------------------------------
 	private static void printFooter(){
 		Loger.prnq(
@@ -218,12 +219,12 @@ public class Dialog {
 					switch (qs.charAt(0)) {
 						case '*':
 	//						printDefine( list);//печать шаблона
-							list.get(0).uConsol(con);
+							list.get(0).uConsol(0,con);
 							break;
 						case '/':
 							return false;
 						case '+':
-							list.get(count).update();
+							list.get(count).update(count);
 						case '-': count++;
 					}//switch
 				else return false;
@@ -235,7 +236,7 @@ public class Dialog {
 			qs = con.nextLine();
 			if (qs.charAt(0) != '+') return false;
 			for (int i = jbeg; i <= jend && i < list.size(); i++) {
-				list.get(i).update();
+				list.get(i).update(i);
 			}
 			count = jend >= list.size() ? list.size() : jend;
 			return false;
@@ -255,12 +256,12 @@ public class Dialog {
 			return false;
 		}
 		Loger.logs("index:"+index);
-		if (index==0) Loger.prnq("Редактирование параметров шаблона для элементов\n");
-		else Loger.prnq("Редактирование параметров элемента:"+index+" \n");
-		Loger.prnq(list.get(index).printTitle());
+		if (index==0) Loger.prnq("Редактирование параметров шаблона для элементов");
+		else Loger.prnq("Редактирование параметров элемента:"+index+" ");
+//		Loger.prnq(list.get(index).printTitle());
 
 //
-		return list.get(index).uConsol(con);
+		return list.get(index).uConsol(index,con);
 	}//editDef
 
 	/**
@@ -287,15 +288,16 @@ public class Dialog {
 			if (single) {
 				Loger.prnt(jNumber + " /" + list.size());
 				Loger.prnq(":\t" + list.get(jNumber).idItem() + "\t<" + list.get(jNumber).title()+">");
-			} else printNext(list);
+			} else printNext(count,list);
 			qs=con.nextLine();
 			if (qs.length() !=0) {
 				int j=0;
-				for (int i = 1; i < qs.length(); i++) {
-					if (qs.charAt(i) >= '0' && qs.charAt(i) <= '9')
-						j = j * 10 + (qs.charAt(i) - '0');
-					else break;
-				}//for
+				j=conInt(qs);
+//				for (int i = 1; i < qs.length(); i++) {
+//					if (qs.charAt(i) >= '0' && qs.charAt(i) <= '9')
+//						j = j * 10 + (qs.charAt(i) - '0');
+//					else break;
+//				}//for
 				Loger.logs(" count:"+count+" jNumber:"+jNumber+" j:"+j);
 				switch (qs.charAt(0)) {
 					case 'q':
@@ -318,7 +320,7 @@ public class Dialog {
 						jNumber = j==0 ? jNumber-1 : j;
 						single=true;
 						break;
-					default: list.get(jNumber).setTitle(qs);//записываю изменение
+					default: list.get(jNumber).setTitle(jNumber,qs);//записываю изменение
 						jNumber++;
 				}//switch
 			} else {//if (qs.length() !=0)
@@ -329,6 +331,15 @@ public class Dialog {
 			printFooterEdit();
 		}//while
 	}//editing
+	static public int conInt(String qs){
+		int j=0;
+		for (int i = 1; i < qs.length(); i++) {
+			if (qs.charAt(i) >= '0' && qs.charAt(i) <= '9')
+				j = j * 10 + (qs.charAt(i) - '0');
+			else break;
+		}//for
+		return j;
+	}//conInt
 }//
 /*
 public static void ClearConsole(){

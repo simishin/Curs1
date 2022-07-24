@@ -8,47 +8,88 @@ import java.util.Scanner;
  * предназначен для работы с параметрами классов через меню
  */
 public class XFields {
-	private static int count=0;
-
-	public enum Typ{INT,STRING,ENUM}
-	private int idMenu;
-	private int id;
-	private Typ typ;
-	private String title;
-	private String descript;
+	private static int countId =0; //Счетчик для элементов
+	static int count=0;//указатель положения при печати списка значений
+	public enum Typ{INT,STRING,ENUM,LIST}
+	private final int idMenu;
+	private final int id;
+	private final Typ typ;
+	private final String title;
+	private final String descript;
+	private final int		valMin;
+	private final int		valMax;
+	private final String[] arrValue;
+	private List<Item> list;
 	private String values;
-	private String[] arrValue;
 	private int		valuei;
-	private int		valMin;
-	private int		valMax;
 	private boolean use;//использовать при модификации записи или оставить без изменения данное поле
 
 	public XFields(int idMenu, Typ typ, String title, String descript, int valMin, int valMax) {
-		this.id = count++;
+		this.id = countId++;
 		this.idMenu = idMenu;
 		this.typ = typ;
 		this.title = title;
 		this.descript = descript;
-		this.values = "";
-		this.valuei = 0;
 		this.valMin = valMin;
 		this.valMax = valMax;
-		this.use = false;
 		this.arrValue=null;
-	}//XFields=======================================================================
-
-	public XFields(int idMenu, Typ typ, String title, String descript, String ...arrVal) {
-		this.id = count++;
-		this.idMenu = idMenu;
-		this.typ = typ;
-		this.title = title;
-		this.descript = descript;
 		this.values = "";
 		this.valuei = 0;
-		this.valMin = 1;
 		this.use = false;
-		arrValue= arrVal;
+	}//XFields=======================================================================
+	public XFields(int idMenu, String title, String descript, int valMin, int valMax, int valuei) {
+		this.id = countId++;
+		this.idMenu = idMenu;
+		this.typ = Typ.INT;
+		this.title = title;
+		this.descript = descript;
+		this.valMin = valMin;
+		this.valMax = valMax;
+		this.arrValue=null;
+		this.values = "";
+		this.valuei = valuei;
+		this.use = false;
+	}//XFields=======================================================================
+	public XFields(int idMenu, String title, String descript, int valMin, int valMax, String values) {
+		this.id = countId++;
+		this.idMenu = idMenu;
+		this.typ = Typ.STRING;
+		this.title = title;
+		this.descript = descript;
+		this.valMin = valMin;
+		this.valMax = valMax;
+		this.arrValue=null;
+		this.values = values;
+		this.valuei = 0;
+		this.use = false;
+	}//XFields=======================================================================
+
+	public XFields(int idMenu, String title, String descript, String ...arrVal) {
+		this.id = countId++;
+		this.idMenu = idMenu;
+		this.typ = Typ.ENUM;
+		this.title = title;
+		this.descript = descript;
+		this.valMin = 1;
 		this.valMax = arrVal.length;
+		arrValue= arrVal;
+		this.values = "";
+		this.valuei = 0;
+		this.use = false;
+	}//XFields=======================================================================
+	public XFields(int idMenu, String title, String descript, List<Item> list) {
+		this.id = countId++;
+		this.idMenu = idMenu;
+		this.typ = Typ.LIST;
+		this.title = title;
+		this.descript = descript;
+		this.valMin = 1;
+		this.valMax = list.size();
+		arrValue= null;
+		this.list = list;
+		this.values = "";
+		this.valuei = 0;
+		this.use = false;
 	}//XFields=======================================================================
 
 	/**
@@ -63,15 +104,15 @@ public class XFields {
 	 */
 	public static boolean uConsol(Scanner con, XFields[] uField, String titul) {
 		Loger.logs("");
-		Loger.prnq(titul+"\nЗначения полей элемента");
+		Loger.prnq(titul);
 		int q;
 		while (true){
-			printDefine(uField);//печать списка параметров
-			Loger.prnq("Выберете номер поля или 0,/- для выхода в главное меню, 9,*,+,-- вернуться ("+(uField.length)+")\n");
+			printSetting(uField);//печать списка параметров
+			Loger.prnq("n,(0+-*/),? :");
 			try {
 				int y = con.nextInt();
 				if (y==0) return false;
-				if (y==9) return false;
+//				if (y==9) return false;
 				if(y>0 && y<=uField.length){
 					do {
 						q = editValue(con,uField[y-1]);
@@ -88,6 +129,10 @@ public class XFields {
 					case '-':
 					case '+':
 						return false;
+					case '?':
+						Loger.prnq("Выберете номер поля или 0,/- для выхода в главное меню, " +
+								"9,*,+,-- вернуться ("+(uField.length)+")\n");
+
 					default:
 						Loger.prne("(" + con.next() + "(" + (int) con.next().charAt(0) + ") Error, повторите ввод 'q'\n");
 				}//switch
@@ -213,13 +258,83 @@ public class XFields {
 					}//catch
 				}//while
 			}//case ENUM
+			case LIST -> {
+				Loger.prnq("Выберете значение параметра "+uField.title+" из списка  или :" +
+						"\n/- для выхода, *-выход к списку, --отключение и следующий, +- включение и следующий");
+				Loger.prnq("Значение параметра используется при корректировке: "+(uField.use ? "Да" : "НЕТ"));
+				if (uField.list.size()<2){
+					Loger.prnq("Список значений параметра пустой.");
+					return 0;
+				}
+				for (Item x: uField.list ) if (x.idItem()== uField.valuei) {
+					Loger.prnq("текущее значение :"+x.title()); break;
+				}
+				Loger.prnq("Описание параметра: "+uField.descript+":");
+				String	qs;
+				int jend=0;
+				int z=0;
+				label:
+				while (true) {
+					qs = con.nextLine();
+					if (qs.isBlank()) {
+						//печатаю очередную порцию данных
+						Loger.logs("печатаю очередную порцию данных");
+						count=Dialog.printNext(count ,uField.list);
+					} else {
+						if (qs.charAt(0)>='0' && qs.charAt(0)<='9') jend = (qs.charAt(0) - '0');
+						for (int i = 1; i < qs.length(); i++) {
+							if (qs.charAt(i) >= '0' && qs.charAt(i) <= '9')
+								jend = jend * 10 + (qs.charAt(i) - '0');
+							else  break;
+						}//for
+						switch (qs.charAt(0)) {
+							case '*': z++;
+							case '+': z++;
+								if (jend==0) break;
+//								for (Item x: uField.list ) if (x.idItem()== jend){
+//									uField.valuei = jend;
+//									return z;
+//								}
+								if (jend<uField.list.size()){
+									uField.valuei=uField.list.get(jend).idItem();
+									uField.use=true;
+								}
+								Loger.logs("valuei "+uField.valuei+" z"+z);
+								return z;
+							case 'q':
+							case '-':
+							case '/': return -1;
+							case ' ':
+//							case '%':
+//							case '=':
+
+//							case '?':	printHelp();	break;
+							case '0':
+							case '1':
+							case '2':
+							case '3':
+							case '4':
+							case '5':
+							case '6':
+							case '7':
+							case '8':
+							case '9':
+								//								count =jend;
+								count=Dialog.printNext(jend ,uField.list);
+								break;
+							default:
+						}//switch
+						Loger.prnt("?");
+					}
+				}//while
+			}//case LIST
 		}//switch
 		return 0;
 	}//editValue --------------------------------------------------------------------
 
 	public static void prnStencil(XFields[] uField){
 		assert uField.length>0 : "Начата обработка пустого списка параметров элемента (XFields.printSelect)";
-		Loger.prnq(" ( №, Используется, Значение, Наименование параметра )");
+		Loger.prnq("(\tИсп.,\tЗначение, Наименование)");
 		for (int i = 0; i < uField.length; i++) {
 			assert uField[i] !=null : "Зарезервировано больше, чем описано параметров элемента ";
 			Loger.prnq("\t"+(uField[i].use ? "<+>" : "(-)")+"   "+uField[i].putValue()+" :\t"+uField[i].title);
@@ -230,10 +345,10 @@ public class XFields {
 		 * Печать списка параметров элемента. Вызывается из локальной uConsol()
 		 * @param uField список параметров элемента
 		 */
-	public static void printDefine(XFields[] uField) {//печать одной странички из списка
+	public static void printSetting(XFields[] uField) {//печать одной странички из списка
 		assert uField.length>0 : "Начата обработка пустого списка параметров элемента (XFields.printSelect)";
 //		if (uField.length<1) return;
-		Loger.prnq(" ( №, Используется, Значение, Наименование параметра )");
+		Loger.prnq("( №,\tИсп.,\tЗначение, Наименование параметра )");
 		for (int i = 0; i < uField.length; i++) {
 			assert uField[i] !=null : "Зарезервировано больше, чем описано параметров элемента ";
 			Loger.prnq((i+1)+".\t"+(uField[i].use ? "<+>" : "(-)")+"   "+uField[i].putValue()+" :\t"+uField[i].title);
@@ -248,6 +363,12 @@ public class XFields {
 				if (arrValue.length==1)	return "";
 				else return arrValue[valuei<arrValue.length && valuei>0 ? valuei : 0];
 			}
+			case LIST -> {
+				for (Item x: this.list ) if (x.idItem()== this.valuei) {
+					return "("+String.valueOf(valuei)+") "+x.title();
+				}
+				return String.valueOf(valuei);
+			}
 		}//switch
 		return "";
 	}//putValue ------------------------------------------------------------------------
@@ -257,4 +378,5 @@ public class XFields {
 	public void let(int x){ valuei=x; }
 	public int let(){return valuei;}
 	public boolean isUse(){ return use; }//использовать
+	public void let(boolean x){use =x;}
 }//Fields

@@ -27,7 +27,7 @@ public class Room implements Item {
 	static {//инициализация класса
 		uField[0] =new XFields(1, XFields.Typ.STRING,"Здание","",1,35);
 		uField[1] =new XFields(1, XFields.Typ.INT,"Этаж","",-9,25);
-		uField[2] =new XFields(1, XFields.Typ.ENUM,"Класс пожарной безопасности","", uClassRom);
+		uField[2] =new XFields(1, "Класс пожарной безопасности","", uClassRom);
 	}//инициализация класса
 
 	public XFields[] uField(){return uField;}
@@ -62,9 +62,10 @@ public class Room implements Item {
 
 	/**
 	 * модификация элемента списка по шаблону, находящемся в нулевом элементе
+	 * @param index индекс модифицируемого элемента в списке
 	 */
 	@Override
-	public void update(){
+	public void update(int index){
 		Room y = (Room)list.get(0);
 		if (uField[0].isUse()) this.bild = y.bild;
 		if (uField[1].isUse()) this.floor = y.floor;
@@ -93,7 +94,7 @@ public class Room implements Item {
 	 * истина - выход на верхний уровень меню, лож- продолжение редактирования списка
 	 */
 	@Override
-	public boolean uConsol(Scanner con) {
+	public boolean uConsol(int index, Scanner con) {
 		Loger.logs(" idRoom:"+this.idRoom);
 		Room y = (Room)this;
 		uField[0].let(y.bild);
@@ -103,22 +104,22 @@ public class Room implements Item {
 		y.bild=uField[0].lets();
 		y.floor=uField[1].let();
 		y.kClassRom = uField[2].let();
-		Room z = (Room)list.get(0);
-		z.bild=uField[0].lets();
-		z.floor=uField[1].let();
-		z.kClassRom = uField[2].let();
 		return q;
 	}//uConsol---------------------------------------------------------
 
 	public static void test() {//создание набора данных для тестирования
-		list.add(new Room(1,1,2,"16a","101 Трансформаторная"));
-		list.add(new Room(2,1,2,"16a","111 Прачка"));
-		list.add(new Room(3,1,2,"16a","103 Ателье"));
-		list.add(new Room(4,2,3,"16a","201 Зоопарк"));
-		list.add(new Room(5,2,4,"16a","221 Аптека"));
-		list.add(new Room(6,2,2,"16a","231 Салон"));
-		list.add(new Room(7,2,4,"16a","212 Баня"));
-		list.add(new Room(8,3,1,"16a","301 Курилка"));
+		list.add(new Room(21,1,2,"16a","101 Трансформаторная"));
+		list.add(new Room(22,1,2,"16a","111 Прачка"));
+		list.add(new Room(23,1,2,"16a","103 Ателье"));
+		list.add(new Room(24,2,3,"16a","201 Зоопарк"));
+		list.add(new Room(25,2,1,"16a","221 Аптека"));
+		list.add(new Room(26,2,2,"16a","231 Салон"));
+		list.add(new Room(27,2,1,"16a","270 Баня"));
+		list.add(new Room(28,3,1,"16a","280 Курилка"));
+		list.add(new Room(29,4,2,"16a","290 Курилка"));
+		list.add(new Room(30,4,3,"16a","300 Курилка"));
+		list.add(new Room(31,4,1,"16a","331 Курилка"));
+
 	}//test
 
 	@Override
@@ -138,6 +139,6 @@ public class Room implements Item {
 	public String title() { return titleRoom; }
 
 	@Override
-	public void setTitle(String x) { titleRoom =x; }
+	public void setTitle(int j, String x) { titleRoom =x; }
 
 }//class Room

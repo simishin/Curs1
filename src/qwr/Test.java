@@ -3,6 +3,7 @@ package qwr;
 
 import qwr.config.AreaZon;
 import qwr.config.Room;
+import qwr.config.VSensor;
 
 import java.util.Scanner;
 
@@ -17,20 +18,12 @@ public class Test {
 		Scanner con = new Scanner(System.in);
 		AreaZon.init();
 		AreaZon.test();
-//		Menu.consol();
 //		Dialog<AreaZon>.list=AreaZon.list;
 //		Dialog.uConsol(con,AreaZon.list);
 		Room.init();
 		Room.test();
-		Room.list.get(0).uConsol(con);
-//		Room.uConsol(con);
-
-//		XFields.uConsol(con,Room.uField,"тестовый запуск");
-
-
-
-
-	    XFields[] z = new XFields[2];
-
+		VSensor.init();
+//		Room.list.get(0).uConsol(con);
+		MainMenu.consol();
 	}//main -----------------------------------------------------------------------
 }//class Test======================================================================
