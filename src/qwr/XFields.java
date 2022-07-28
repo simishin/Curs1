@@ -106,37 +106,48 @@ public class XFields {
 		Loger.logs("");
 		Loger.prnq(titul);
 		int q;
+		String	qs;
 		while (true){
 			printSetting(uField);//печать списка параметров
 			Loger.prnq("n,(0+-*/),? :");
-			try {
-				int y = con.nextInt();
-				if (y==0) return false;
-//				if (y==9) return false;
-				if(y>0 && y<=uField.length){
-					do {
-						q = editValue(con,uField[y-1]);
-						if (q==-1) break;
-						y++;
-					} while (q==1 && y<uField.length);
-				} else Loger.prnq("Ошибка выбора. Повторите.");
-			} catch (InputMismatchException ex) {
-				switch (con.next().charAt(0)) {
-					case 'q':
-						return true;
-					case '/':
-					case '*':
-					case '-':
-					case '+':
-						return false;
-					case '?':
+			qs=con.nextLine();
+			if (qs.isBlank()) continue;
+			int y = Dialog.conInt(qs);
+			switch (qs.charAt(0)) {
+				case '?':
 						Loger.prnq("Выберете номер поля или 0,/- для выхода в главное меню, " +
 								"9,*,+,-- вернуться ("+(uField.length)+")\n");
-
-					default:
-						Loger.prne("(" + con.next() + "(" + (int) con.next().charAt(0) + ") Error, повторите ввод 'q'\n");
-				}//switch
-			}//catch
+					break;
+				case 'q':
+					return true;
+				case '%':
+				case '+':
+				case '-':
+				case '/':
+				case '*':
+					return false;
+				case ' ':
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+					if (y==0) return false;
+					if(y>0 && y<=uField.length){
+						do {
+							q = editValue(con,uField[y-1]);
+							if (q==-1) break;
+							y++;
+						} while (q==1 && y<uField.length);
+					} else Loger.prnq("Ошибка выбора. Повторите.");
+					break;
+				default:Loger.prnq("~?~");
+			}//switch
 		}//while
 	}//uConsol-----------------------------------------------------------------------
 
@@ -229,33 +240,49 @@ public class XFields {
 				for (int i = 0; i < uField.arrValue.length; i++) {
 					Loger.prnq((i+1)+".\t"+uField.arrValue[i].toString());
 				}
+				String	qs;
 				while (true) {
-					try {
-						int y = con.nextInt();
-						Loger.logs("="+y);
-						if (y==0) return -1;
-						if (y >= uField.valMin && y <= uField.valMax) {
-							uField.use = true;
-							uField.valuei = y-1;
-							return 0;
-						}
-						Loger.prnq("Значения не существует. Повторите ввод.");
-					} catch (InputMismatchException ex) {
-						switch (con.next().charAt(0)) {
+					qs=con.nextLine();
+					if (qs.length() !=0) {
+						int y=Dialog.conInt(qs);
+						switch (qs.charAt(0)) {
 							case 'q':
+							case '%':
 								return -1;
 							case '/':
 							case '*':
 								return 0;
+							case ' ':
+								break;
 							case '+':
 								uField.use = true;
 								return 1;
 							case '-':
 								uField.use = false;
 								return 1;
-							default:
+							case '0':
+							case '1':
+							case '2':
+							case '3':
+							case '4':
+							case '5':
+							case '6':
+							case '7':
+							case '8':
+							case '9':
+								if (y==0) return -1;
+								if (y >= uField.valMin && y <= uField.valMax) {
+									uField.use = true;
+									uField.valuei = y-1;
+									return 0;
+								}
+								Loger.prnq("Значения не существует. Повторите ввод.");
+								break;
+							default:Loger.prnq("~?~");
 						}//switch
-					}//catch
+					} else {//if (qs.length() !=0)
+
+					}
 				}//while
 			}//case ENUM
 			case LIST -> {

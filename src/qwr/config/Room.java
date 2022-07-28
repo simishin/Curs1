@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import static qwr.Loger.prnq;
+import static qwr.Loger.prnt;
+import static qwr.SharSystem.UtilFile.sepr;
+
 /**
  * Класс определяет место установки оборудования на объекте
  */
@@ -21,16 +25,15 @@ public class Room implements Item {
 	String	bild;//здание
 
 	static public List<Item> list = new ArrayList<>();
-	static public void init(){ list.add(new Room(0,0,0,"","")); }//init
 
 	static public XFields[] uField = new XFields[3];//список полей для генерации элементов
 	static {//инициализация класса
 		uField[0] =new XFields(1, XFields.Typ.STRING,"Здание","",1,35);
 		uField[1] =new XFields(1, XFields.Typ.INT,"Этаж","",-9,25);
 		uField[2] =new XFields(1, "Класс пожарной безопасности","", uClassRom);
+		list.add(new Room(0,0,0,"",""));
 	}//инициализация класса
 
-	public XFields[] uField(){return uField;}
 	//для инициализации и тестирования
 	public Room(int idRoom, int floor, int kClassRom, String bild, String titleRoom) {
 		this.idRoom = idRoom;
@@ -55,11 +58,6 @@ public class Room implements Item {
 		return new Room(id,x1,x2,x0,"");
 	}
 
-//	@Override
-//	public void printTest(){
-//		Loger.prnq(">>>>>>"+uField[0].isUse()+"\t"+uField[1].isUse()+"\t"+uField[2].isUse());
-//	}//printTest --------------------------------------------------------------------
-
 	/**
 	 * модификация элемента списка по шаблону, находящемся в нулевом элементе
 	 * @param index индекс модифицируемого элемента в списке
@@ -71,7 +69,6 @@ public class Room implements Item {
 		if (uField[1].isUse()) this.floor = y.floor;
 		if (uField[2].isUse()) this.kClassRom = y.kClassRom;
 	}//update---------------------------------------------------------
-//	public int floor(){return floor;}
 	/**
 	 * Выводит на экран установленные фильтры для конкретного списка элементов
 	 * Вызывается из Dialog.printDefine(List<Item> list)
@@ -141,4 +138,38 @@ public class Room implements Item {
 	@Override
 	public void setTitle(int j, String x) { titleRoom =x; }
 
+	/**
+	 * Возвращение ссылки на список данного класса
+	 * Вызывается из LoadExternDataThead.workIntegrate
+	 * @return ссылка на список данного класса
+	 */
+	public List<Item> linkList(){ return list; }
+	public static final int sizeAr=6;//9 количество полей в текстовом файле данных
+	/**
+	 * Создание элемента нужного типа для помещения в очередь новых элементов
+	 * полученных из внешних файлов. Вызывается из GrRecords.readRecordExt
+	 * @param words срока из файла внешних данных
+	 * @param src номер элемента в enum GrRecords
+	 * @return новый элемент
+	 */
+	public static Item creatExtDbf(String[] words, int src) {
+		if (words.length < sizeAr) {
+			for (int i = 0; i < words.length; i++) prnt("+  "+i+"-"+words[i]);prnq("~"+words.length);
+			return null; //недостаточное количество элементов
+		}
+		Room z;
+		try { z=new Room(Integer.parseInt(words[1]),Integer.parseInt(words[2]),
+				Integer.parseInt(words[3]),words[4],words[5]);
+		}
+		catch (Exception ex) {ex.printStackTrace();return null;}
+		if (list.isEmpty()) return z;
+		for (Item x : list) if (z.equals((Room) x)) return null;
+		return z;
+	}//creatExtDbf
+	//Room(int idRoom, int floor, int kClassRom, String bild, String titleRoom)
+
+	@Override
+	public String toString() {//создание строки для записи в текстовый файл
+		return sepr+ idRoom + sepr+ floor + sepr+ kClassRom + sepr+ titleRoom + sepr+ bild + sepr;
+	}//toString
 }//class Room

@@ -291,8 +291,7 @@ public class Dialog {
 			} else printNext(count,list);
 			qs=con.nextLine();
 			if (qs.length() !=0) {
-				int j=0;
-				j=conInt(qs);
+				int j=conInt(qs);
 //				for (int i = 1; i < qs.length(); i++) {
 //					if (qs.charAt(i) >= '0' && qs.charAt(i) <= '9')
 //						j = j * 10 + (qs.charAt(i) - '0');
@@ -333,31 +332,14 @@ public class Dialog {
 	}//editing
 	static public int conInt(String qs){
 		int j=0;
-		for (int i = 1; i < qs.length(); i++) {
+		for (int i = 0; i < qs.length(); i++) {
 			if (qs.charAt(i) >= '0' && qs.charAt(i) <= '9')
 				j = j * 10 + (qs.charAt(i) - '0');
-			else break;
+			else if (i>0) break;
 		}//for
 		return j;
 	}//conInt
+	static public boolean isNumber(String qs, int i){
+		return qs.charAt(i) >= '0' && qs.charAt(i) <= '9';
+	}
 }//
-/*
-public static void ClearConsole(){
-        try{
-            String operatingSystem = System.getProperty("os.name") //Check the current operating system
-
-            if(operatingSystem.contains("Windows")){
-                ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "cls");
-                Process startProcess = pb.inheritIO.start();
-                startProcess.waitFor();
-            } else {
-                ProcessBuilder pb = new ProcessBuilder("clear");
-                Process startProcess = pb.inheritIO.start();
-                startProcess.waitFor();
-            }
-        }catch(Exception e){
-            System.out.println(e);
-        }
-    }
- */
-

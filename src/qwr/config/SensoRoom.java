@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import static qwr.Loger.prnq;
+import static qwr.Loger.prnt;
+import static qwr.SharSystem.UtilFile.sepr;
+
 /**
  * Класс привязку датчиков к месту и дополнительные параметры датчиков,
  * незатронутые в классе описывающим тип датчиков
@@ -22,7 +26,6 @@ public class SensoRoom implements Item {
 	QSensor	status;	//состояние датчика
 
 	static public List<Item> list = new ArrayList<>();
-//	static public void init(){ list.add(new SensoRoom(0,0,0,"",null)); }//init
 
 	public SensoRoom(int id, int idRoom, int idSensor, String title, QSensor status) {
 		this.id = id;
@@ -122,5 +125,39 @@ public class SensoRoom implements Item {
 		return id+"\t"+idRoom+"\t("+ idSensor +") "+VSensor.list.get(idSensor).title()+"\t"+title; }
 	@Override
 	public String printTitle() { return "Привязка датчика к месту"; }
+
+	/**
+	 * Возвращение ссылки на список данного класса
+	 * Вызывается из LoadExternDataThead.workIntegrate
+	 * @return ссылка на список данного класса
+	 */
+	public List<Item> linkList(){ return list; }
+	public static final int sizeAr=5;//9 количество полей в текстовом файле данных
+	/**
+	 * Создание элемента нужного типа для помещения в очередь новых элементов
+	 * полученных из внешних файлов. Вызывается из GrRecords.readRecordExt
+	 * @param words срока из файла внешних данных
+	 * @param src номер элемента в enum GrRecords
+	 * @return новый элемент
+	 */
+	public static Item creatExtDbf(String[] words, int src) {
+//        assert prnq("$ RiUser.creatExtDbf NOT REALISE $");
+		if (words.length < sizeAr) {
+			for (int i = 0; i < words.length; i++) prnt("+  "+i+"-"+words[i]);prnq("~"+words.length);
+			return null; //недостаточное количество элементов
+		}
+		SensoRoom z;
+		try { z=new SensoRoom(Integer.parseInt(words[1]),Integer.parseInt(words[2]),
+				Integer.parseInt(words[3]),words[4],new QSensor());
+		}
+		catch (Exception ex) {ex.printStackTrace();return null;}
+		if (list.isEmpty()) return z;
+		for (Item x : list) if (z.equals((SensoRoom) x)) return null;
+		return z;
+	}//creatExtDbf
+	@Override
+	public String toString() {//создание строки для записи в текстовый файл
+		return sepr+ id + sepr+ idRoom + sepr+ idSensor + sepr+ title + sepr;
+	}//toString
 
 }//class SensoRoom

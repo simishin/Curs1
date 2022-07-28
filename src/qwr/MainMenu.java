@@ -1,5 +1,6 @@
 package qwr;
 
+import qwr.SharSystem.UtilFile;
 import qwr.config.AreaZon;
 import qwr.config.Room;
 import qwr.config.SensoRoom;
@@ -79,7 +80,7 @@ public record MainMenu(int jItem, int jNext, int level, String uTitle) {
 		add(134, 0, "Привязка к зонам исполнительных устройств");
 		add(135, 0, "Привязка к визуализации исполнительных устройств");
 		add(14, 0, "Чтение из файла");
-		add(141, 0, "Повторное Чтение текущего файла проекта");
+		add(141, 0, "Чтение текущего файла проекта");
 		add(142, 0, "Чтение нового файла проекта");
 		add(143, 0, "Сравнение нового файла проекта с текущем");
 		add(15, 0, "Сохранение данных");
@@ -149,7 +150,10 @@ public record MainMenu(int jItem, int jNext, int level, String uTitle) {
 			case 121:	z=Dialog.uConsol(con, AreaZon.list); break;
 			case 112:	z=Dialog.uConsol(con, SensoRoom.list); break;
 			case 9:		return true;//Завершение работы
+			case 151:	UtilFile.save(); z=-1; break;
+			case 141:	UtilFile.load(); z=-1; break;
 			case 8:
+
 		}//switch
 		switch (z){
 			case -1:	jSelect  = uTreeMenu[x].jNext;

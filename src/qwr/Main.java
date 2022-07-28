@@ -1,19 +1,13 @@
 package qwr;
 
-
-import qwr.config.AreaZon;
-import qwr.config.Room;
-import qwr.config.VSensor;
 import qwr.visual.BackGround;
 
 public class Main {
     public static Loger u= Loger.init();
     public static void main(String[] args) {
-		AreaZon.init();
-		Room.init();
-		VSensor.init();
-    	Menu.consol();
+//    	Menu.consol();
 //	    Dialog.consol();
+		MainMenu.consol();
     }//main -----------------------------------------------------------------------
 }//class Main ======================================================================
 /*
