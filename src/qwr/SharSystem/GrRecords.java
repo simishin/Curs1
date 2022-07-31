@@ -90,6 +90,7 @@ ROOOM{//вспомогательный - количество путей
 //=============================================================================
 SENRM{//вспомогательный - количество пользователей
     @Override
+
     public void writPL(BufferedWriter bw) {
         assert prnq(name()+" : "+ SensoRoom.list.size());
         writPL(SensoRoom.list.stream(), bw);
