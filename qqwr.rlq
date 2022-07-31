@@ -1,0 +1,25 @@
+
+TITUL	Файл сохранения данных настройки охранно-пожарной сигнализации
+ARZON	0	0		
+ARZON	1	12	qwer1	
+ARZON	2	22	qwer2	
+ARZON	3	32	qwer3	
+ARZON	4	42	qwer4	
+ARZON	5	52	qwer5	
+ARZON	6	62	qwer6	
+ARZON	7	72	qwer7	
+ARZON	8	82	qwer8	
+ROOOM	0	0	0			
+ROOOM	21	1	2	101 Трансформаторная	16a	
+ROOOM	22	1	2	111 Прачка	16a	
+ROOOM	23	1	2	103 Ателье	16a	
+ROOOM	24	2	3	201 Зоопарк	16a	
+ROOOM	25	2	1	221 Аптека	16a	
+ROOOM	26	2	2	231 Салон	16a	
+ROOOM	27	2	1	270 Баня	16a	
+ROOOM	28	3	1	280 Курилка	16a	
+ROOOM	29	4	2	290 Курилка	16a	
+ROOOM	30	4	3	300 Курилка	16a	
+ROOOM	31	4	1	331 Курилка	16a	
+SENRM	0	0	0		
+ENDFL
